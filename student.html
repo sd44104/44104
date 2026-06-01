@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>104 STUDENT DASHBOARD</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+:root {
+  --bg-color: #0D0D0E; --card-bg: rgba(22, 22, 24, 0.8); --text-main: #FFFFFF; --text-sub: #8E8E93;
+  --border-light: rgba(255, 255, 255, 0.08); --accent-purple: #BF5AF2; --accent-blue: #0A84FF;
+  --status-green: #30D158; --status-red: #FF453A; --status-orange: #FF9F0A;
+}
+[data-theme="light"] {
+  --bg-color: #F2F2F7; --card-bg: rgba(255, 255, 255, 0.9); --text-main: #1C1C1E;
+  --text-sub: #8E8E93; --border-light: rgba(0, 0, 0, 0.1);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--bg-color); color: var(--text-main); font-family: 'Pretendard', sans-serif; overflow: hidden; transition: background-color 0.3s; }
+
+.bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 10% 15%, rgba(191, 90, 242, 0.08) 0%, transparent 45%), radial-gradient(circle at 90% 85%, rgba(10, 132, 255, 0.08) 0%, transparent 45%); z-index: -1; pointer-events: none; }
+.container { display: flex; flex-direction: column; width: 100%; height: 100vh; padding: 16px; gap: 12px; }
+
+.page { display: none; width: 100%; height: 100%; }
+.page.active { display: flex; flex-direction: column; }
+
+.dashboard-grid { display: grid; grid-template-columns: 260px 1fr 340px; gap: 16px; height: 100%; width: 100%; }
+.panel { background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--border-light); padding: 20px; display: flex; flex-direction: column; }
+
+.left-col { gap: 12px; overflow-y: auto; }
+.profile-area h2 { font-size: 24px; margin: 0 0 5px 0; }
+.profile-area p { margin: 0; color: var(--text-sub); font-size: 14px; }
+.info-block { background: rgba(128,128,128,0.05); border-radius: 12px; padding: 15px; flex: 1; overflow-y: auto;}
+.info-block h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--accent-purple); display:flex; justify-content:space-between; align-items:center; }
+
+.game-block { background: rgba(243, 156, 18, 0.05); border-radius: 12px; padding: 12px; border: 1px solid rgba(243, 156, 18, 0.15); margin-bottom: 2px; }
+.game-block h3 { margin: 0 0 8px 0; font-size: 14px; color: #f39c12; display: flex; align-items: center; gap: 6px; }
+.game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.game-btn-item { background: rgba(128,128,128,0.08); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px; color: var(--text-main); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+.game-btn-item:active { transform: scale(0.97); }
+
+.bottom-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.link-item { background: rgba(128,128,128,0.05); border-radius: 10px; padding: 10px 5px; text-decoration: none; color: var(--text-main); font-size: 12px; font-weight: 600; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--border-light); transition: 0.2s; }
+.link-item i { font-size: 18px; color: var(--accent-blue); }
+.link-item:active { transform: scale(0.97); background: rgba(255,255,255,0.05); }
+
+.center-col { justify-content: flex-start; align-items: center; text-align: center; }
+.status-display h3 { margin: 0 0 5px 0; font-size: 16px; color: var(--text-sub); }
+.current-status-text { font-size: 48px; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
+.status-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 400px; }
+.status-btns button { height: 70px; border-radius: 16px; border: 1px solid var(--border-light); background: rgba(128,128,128,0.05); color: var(--text-main); font-size: 15px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+.status-btns button:active { transform: scale(0.96); }
+
+.timer-container { background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2); width: 100%; max-width: 400px; padding: 15px; border-radius: 16px; margin-bottom: 25px; text-align: center; }
+.timer-display { font-size: 36px; font-weight: 800; color: var(--accent-blue); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+.timer-btn { background: var(--accent-blue); color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+.timer-btn.running { background: var(--status-red); }
+
+.chat-col { padding: 0; justify-content: space-between; }
+.chat-header { padding: 15px 20px; border-bottom: 1px solid var(--border-light); font-weight: 700; display: flex; justify-content: space-between; }
+.chat-logs { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column-reverse; gap: 10px; }
+.msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; background: rgba(128,128,128,0.1); max-width: 90%; align-self: flex-start; }
+.msg-bubble.admin { background: rgba(191, 90, 242, 0.15); border-left: 3px solid var(--accent-purple); border-radius: 4px 14px 14px 14px; }
+.msg-info { font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 4px; font-weight: bold; }
+.chat-input-area { padding: 15px; border-top: 1px solid var(--border-light); display: flex; gap: 8px; }
+.chat-input { flex: 1; height: 40px; background: rgba(128,128,128,0.1); border: none; border-radius: 10px; padding: 0 12px; color: var(--text-main); outline:none;}
+.send-btn { width: 45px; background: var(--accent-blue); border: none; border-radius: 10px; color: #fff; cursor: pointer; }
+
+.inquiry-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: 0.3s; }
+.inquiry-modal.show { display: flex; opacity: 1; }
+.inquiry-content { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 20px; padding: 25px; width: 100%; max-width: 350px; backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 15px; }
+.inquiry-content h3 { margin: 0; font-size: 18px; color: var(--accent-blue); display: flex; align-items: center; gap: 8px; }
+.inquiry-textarea { width: 100%; height: 120px; background: rgba(128,128,128,0.1); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; color: var(--text-main); font-family: inherit; font-size: 14px; resize: none; outline: none; }
+
+.menu-btn-item { background: rgba(128,128,128,0.1); border: 1px solid var(--border-light); padding: 15px; border-radius: 12px; color: var(--text-main); font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+.menu-btn-item:active { transform: scale(0.97); background: rgba(255,255,255,0.05); }
+
+.page-game { background-color: #2c3e50; position: relative; align-items: center; justify-content: center; padding: 0; }
+.game-top-bar { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
+.game-score-text { font-size: 20px; font-weight: bold; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); line-height: 1.4; }
+.game-exit-btn { pointer-events: auto; background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.ys-canvas { background-color: #e0d0a6; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-radius: 10px; width: 100%; max-width: 800px; aspect-ratio: 4/3; object-fit: contain; }
+.ys-dpad { position: absolute; bottom: 30px; right: 30px; display: grid; grid-template-columns: 55px 55px 55px; grid-template-rows: 55px 55px 55px; gap: 5px; z-index: 20; touch-action: none; }
+.ys-dpad-btn { background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; color: white; user-select: none; cursor: pointer; }
+.ys-dpad-btn:active { background: rgba(255,255,255,0.5); }
+
+/* 테트리스 전용 CSS 통합 */
+#tetris-wrapper { display:flex; gap:24px; align-items:flex-start; justify-content:center; padding:1.5rem 0; margin-top:60px; }
+#tetris-gameCanvas { border:1.5px solid #555; display:block; }
+#tetris-sidebar { display:flex; flex-direction:column; gap:12px; min-width:110px; }
+.tetris-panel { background:#222; border:0.5px solid #444; border-radius:8px; padding:12px; }
+.tetris-panel-label { font-size:11px; color:#aaa; margin:0 0 6px; text-transform:uppercase; letter-spacing:.06em; font-family:sans-serif; }
+.tetris-panel-val { font-size:22px; font-weight:500; color:#fff; margin:0; font-family:monospace; text-shadow:none; }
+#tetris-wrapper canvas { display:block; }
+#tetris-nextCanvas, #tetris-holdCanvas { margin:0 auto; }
+#tetris-btn { width:100%; padding:8px 0; font-size:13px; cursor:pointer; border-radius:8px; border:0.5px solid #555; background:#111; color:#fff; font-family:sans-serif; }
+#tetris-btn:hover { background:#333; }
+#tetris-holdPanel { transition:opacity .2s; }
+#tetris-holdPanel.used { opacity:0.4; }
+#tetris-spinMsg { font-size:13px; font-weight:bold; color:#c084fc; font-family:sans-serif; text-align:center; min-height:18px; text-shadow:none; }
+
+@media (max-width: 1024px) and (orientation: portrait) {
+  .dashboard-grid { grid-template-columns: 1fr; grid-template-rows: auto auto auto 1fr; }
+  .left-col { flex-direction: column; }
+  .profile-area { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+  .status-btns { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
+}
+</style>
+</head>
+<body data-theme="light">
+<div class="bg-glow"></div>
+
+<div class="inquiry-modal" id="student-id-modal">
+  <div class="inquiry-content" style="background:#F2F2F7; max-width:320px; padding:30px 20px; align-items:center; border:4px solid #1C1C1E; border-radius:12px;">
+    <h3 style="color:#1C1C1E; font-size:20px; font-weight:800; margin-bottom:20px;">모바일 학생증</h3>
+    
+    <div style="width:120px; height:120px; border-radius:50%; border:2px solid #1C1C1E; display:flex; justify-content:center; align-items:center; margin-bottom:20px; background:#E5E5EA;">
+      <i class="fa-solid fa-user" style="font-size:60px; color:#8E8E93;"></i>
+    </div>
+    
+    <div id="id-number" style="font-size:24px; font-weight:800; letter-spacing:4px; color:#1C1C1E; margin-bottom:10px;">10400</div>
+    <div id="id-name" style="font-size:32px; font-weight:900; color:#1C1C1E; margin-bottom:30px;">이름</div>
+    
+    <div style="background:#FFF; padding:10px; border-radius:8px; border:2px solid #1C1C1E; width:100%; display:flex; justify-content:center;">
+      <svg id="barcode-canvas"></svg>
+    </div>
+    
+    <button onclick="document.getElementById('student-id-modal').classList.remove('show')" style="margin-top:20px; padding:12px; width:100%; border-radius:10px; border:none; background:#1C1C1E; color:#fff; font-weight:bold; cursor:pointer;">닫기</button>
+  </div>
+</div>
+
+<div class="inquiry-modal" id="extra-menu-modal">
+  <div class="inquiry-content">
+    <h3><i class="fa-solid fa-box-archive" style="color:var(--accent-purple);"></i> 기타 기능</h3>
+    <button class="menu-btn-item" onclick="openAppLink('vote')"><i class="fa-solid fa-check-to-slot" style="color:var(--status-green); font-size:18px;"></i> 투표 참여하기</button>
+    <button class="menu-btn-item" onclick="openAppLink('survey')"><i class="fa-solid fa-clipboard-list" style="color:var(--accent-blue); font-size:18px;"></i> 설문 조사하기</button>
+    <button class="menu-btn-item" onclick="openSongModal()"><i class="fa-solid fa-music" style="color:var(--accent-purple); font-size:18px;"></i> 쉬는시간 신청곡 보내기</button>
+    <button class="menu-btn-item" onclick="openInquiryModalFromMenu()"><i class="fa-solid fa-paper-plane" style="color:var(--status-orange); font-size:18px;"></i> 건의 및 질의사항</button>
+    <button onclick="closeExtraMenuModal()" style="margin-top:5px; padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#111; font-weight:bold; cursor:pointer;">닫기</button>
+  </div>
+</div>
+
+<div class="inquiry-modal" id="song-modal">
+  <div class="inquiry-content">
+    <h3>🎵 쉬는시간 신청곡</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin:0;">듣고 싶은 노래의 제목과 가수를 정확히 적어주세요.</p>
+    <input type="text" id="song-title-input" class="login-input" placeholder="곡 제목">
+    <input type="text" id="song-artist-input" class="login-input" placeholder="가수 이름" style="margin-bottom: 0;">
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button onclick="closeSongModal()" style="flex:1; padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#111; font-weight:bold; cursor:pointer;">취소</button>
+      <button onclick="submitSong()" style="flex:1; padding:12px; border-radius:10px; border:none; background:var(--accent-purple); color:#fff; font-weight:bold; cursor:pointer;">신청하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="inquiry-modal" id="inquiry-modal">
+  <div class="inquiry-content">
+    <h3>💡 건의 및 질의사항</h3>
+    <p style="font-size:12px; color:var(--text-sub); margin:0;">작성하신 내용은 관리자(선생님)에게만 안전하게 전달됩니다.</p>
+    <textarea id="inquiry-text" class="inquiry-textarea" placeholder="선생님께 전달할 내용을 자유롭게 입력해주세요..."></textarea>
+    <div style="display:flex; gap:10px;">
+      <button onclick="closeInquiryModal()" style="flex:1; padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#111; font-weight:bold; cursor:pointer;">취소</button>
+      <button onclick="submitInquiry()" style="flex:1; padding:12px; border-radius:10px; border:none; background:var(--accent-blue); color:#fff; font-weight:bold; cursor:pointer;">전송하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="inquiry-modal" id="ys-mode-modal">
+  <div class="inquiry-content">
+    <h3><i class="fa-solid fa-gamepad" style="color:#f39c12;"></i> 예성스타즈 모드 선택</h3>
+    <button class="menu-btn-item" onclick="startYsSingleFromModal()" style="color:#f39c12; justify-content:center;"><i class="fa-solid fa-robot"></i> 혼자하기 (AI 봇전)</button>
+    <button class="menu-btn-item" onclick="startYsMultiFromModal()" style="color:#3498db; justify-content:center;"><i class="fa-solid fa-users"></i> 같이하기 (실시간 멀티)</button>
+    <button onclick="closeYsModeModal()" style="margin-top:5px; padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#111; font-weight:bold; cursor:pointer;">취소</button>
+  </div>
+</div>
+
+<div class="container">
+  <div id="page-dashboard" class="page">
+    <div class="dashboard-grid">
+      <div class="panel left-col">
+        <div class="profile-area">
+          <p>환영합니다!</p>
+          <h2 id="display-name">학생님</h2>
+          <p id="my-seat-display" style="color:var(--status-green); font-weight:bold; margin-top:5px; font-size:15px;"></p>
+          <button style="background:rgba(255,69,58,0.1); color:var(--status-red); border:none; border-radius:8px; padding:6px 12px; cursor:pointer; margin-top:8px;" onclick="processLogout()">로그아웃</button>
+        </div>
+        
+        <div class="info-block">
+          <h3>
+            <span><i class="fa-solid fa-bullhorn"></i> 학급 공지사항</span>
+            <button onclick="writeClassNotice()" style="background:none; border:none; color:var(--accent-blue); cursor:pointer; font-size:12px;"><i class="fa-solid fa-pen"></i> 작성</button>
+          </h3>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div id="pinned-notice" style="color:var(--status-orange); font-weight:bold; font-size:13px; display:none;"></div>
+            <div id="student-notices-list" style="font-size:12.5px; line-height:1.4;"></div>
+          </div>
+        </div>
+
+        <div class="game-block">
+          <h3><i class="fa-solid fa-gamepad"></i> 104 미니게임존</h3>
+          <div class="game-grid">
+            <button class="game-btn-item" onclick="openYsModeModal()" style="grid-column: 1 / span 2; padding: 12px; font-size: 13.5px; border-color:#f39c12; color:#f39c12;">
+              <i class="fa-solid fa-star"></i> 예성스타즈 (모드 선택)
+            </button>
+            <button class="game-btn-item" onclick="enterBlockBlast()" style="border-color:#e91e63; color:#e91e63;"><i class="fa-solid fa-cubes"></i> 블록블라스트</button>
+            <button class="game-btn-item" onclick="enterDinoGame()" style="border-color:#4caf50; color:#4caf50;"><i class="fa-solid fa-dragon"></i> 다이노게임</button>
+            <button class="game-btn-item" onclick="enterTetris()" style="grid-column: 1 / span 2; border-color:#00bcd4; color:#00bcd4; padding: 12px; font-size: 13.5px;"><i class="fa-solid fa-shapes"></i> 테트리스</button>
+          </div>
+        </div>
+        
+        <div class="bottom-links">
+          <a href="http://104yaza.enn.kr" target="_blank" class="link-item"><i class="fa-solid fa-desktop"></i>전광판</a>
+          <a href="https://sunduck.riroschool.kr" target="_blank" class="link-item"><i class="fa-solid fa-pen-clip"></i>리로스쿨</a>
+          <a href="https://sunduck.sen.hs.kr" target="_blank" class="link-item"><i class="fa-solid fa-school"></i>학교홈피</a>
+        </div>
+      </div>
+
+      <div class="panel center-col">
+        <div class="status-display">
+          <button onclick="openMobileId()" style="background:#1C1C1E; color:#FFF; border:none; padding:10px 20px; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; margin-bottom:15px; width:100%; max-width:200px;"><i class="fa-solid fa-id-badge"></i> 모바일 학생증 보기</button>
+          <h3>자율학습 출석체크</h3>
+          <div id="my-status-text" class="current-status-text">로딩중</div>
+        </div>
+
+        <div class="timer-container">
+          <h3 style="margin:0 0 5px 0; font-size:14px; color:var(--text-sub);">⏱️ 오늘 나의 순공시간</h3>
+          <div id="timer-time" class="timer-display">00:00:00</div>
+          <button id="timer-toggle-btn" class="timer-btn" onclick="toggleStudyTimer()">공부 시작</button>
+        </div>
+        
+        <div id="normal-controls" class="status-btns">
+          <button style="border-color:var(--status-green); color:var(--status-green);" onclick="changeMyState('출석')"><i class="fa-solid fa-check"></i>출석</button>
+          <button style="border-color:var(--status-red); color:var(--status-red);" onclick="changeMyState('결석')"><i class="fa-solid fa-xmark"></i>결석</button>
+          <button style="border-color:var(--status-orange); color:var(--status-orange);" onclick="changeMyState('조퇴')"><i class="fa-solid fa-person-walking-arrow-right"></i>조퇴</button>
+          <button onclick="changeMyState('수학인재')"><i class="fa-solid fa-calculator"></i>수학인재</button>
+          <button onclick="changeMyState('융합인재')"><i class="fa-solid fa-flask"></i>융합인재</button>
+          <button onclick="changeMyState('담임상담')"><i class="fa-solid fa-comments"></i>담임상담</button>
+          <button style="grid-column: span 3;" onclick="changeMyState('기타')">기타 (직접입력)</button>
+        </div>
+
+        <div id="premium-controls" class="status-btns" style="display:none; grid-template-columns: 1fr 1fr; width: 80%;">
+          <button style="height: 100px; font-size: 18px;" onclick="changeMyState('1-4 교실자습')"><i class="fa-solid fa-school" style="font-size:24px; color:var(--status-green);"></i>1-4 교실자습</button>
+          <button style="height: 100px; font-size: 18px;" onclick="changeMyState('심화반 이동자습')"><i class="fa-solid fa-fire" style="font-size:24px; color:var(--status-orange);"></i>심화반 이동자습</button>
+        </div>
+        
+        <div style="width: 100%; max-width: 400px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; padding-top: 25px;">
+          <button class="link-item" onclick="openExtraMenuModal()" style="width: 100%; border: 1px solid var(--border-light); background: rgba(128,128,128,0.05); color: var(--text-main); font-size: 13px; font-weight: 600; padding: 14px; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-box-archive" style="font-size: 22px; color: var(--accent-purple);"></i> 기타기능
+          </button>
+          <button class="link-item" onclick="toggleTheme()" style="width: 100%; border: 1px solid var(--border-light); background: rgba(128,128,128,0.05); color: var(--text-main); font-size: 13px; font-weight: 600; padding: 14px; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-circle-half-stroke" style="font-size: 22px; color: var(--text-main);"></i> 다크/라이트모드
+          </button>
+        </div>
+      </div>
+
+      <div class="panel chat-col">
+        <div class="chat-header">
+          <span><i class="fa-solid fa-message" style="color:var(--accent-purple)"></i> 실시간 한마디</span>
+        </div>
+        <div id="chat-logs" class="chat-logs"></div>
+        <div class="chat-input-area">
+          <input type="text" id="chat-nickname" class="chat-input" placeholder="닉네임" style="width: 70px; flex:none;">
+          <input type="text" id="chat-message" class="chat-input" placeholder="메시지 입력..." onkeydown="if(event.keyCode==13) sendMessageAction()">
+          <button id="send-msg-btn" class="send-btn" onclick="sendMessageAction()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-ys-single" class="page page-game">
+    <div class="game-top-bar">
+      <div class="game-score-text">
+        <span style="color:#3498db;">우리팀 보석: <span id="ys-single-my-score">0</span> / 30</span><br>
+        <span style="color:#e74c3c;">적팀 보석: <span id="ys-single-enemy-score">0</span> / 30</span>
+      </div>
+      <button class="game-exit-btn" onclick="exitYsSingleGame()">나가기</button>
+    </div>
+    <canvas id="ys-single-canvas" class="ys-canvas" width="800" height="600"></canvas>
+    <div class="ys-dpad">
+      <div class="ys-dpad-btn" style="grid-column: 2; grid-row: 1;" onmousedown="ysKeys['ArrowUp']=true;" onmouseup="ysKeys['ArrowUp']=false;" onmouseleave="ysKeys['ArrowUp']=false;" ontouchstart="ysKeys['ArrowUp']=true; event.preventDefault();" ontouchend="ysKeys['ArrowUp']=false; event.preventDefault();"><i class="fa-solid fa-arrow-up"></i></div>
+      <div class="ys-dpad-btn" style="grid-column: 1; grid-row: 2;" onmousedown="ysKeys['ArrowLeft']=true;" onmouseup="ysKeys['ArrowLeft']=false;" onmouseleave="ysKeys['ArrowLeft']=false;" ontouchstart="ysKeys['ArrowLeft']=true; event.preventDefault();" ontouchend="ysKeys['ArrowLeft']=false; event.preventDefault();"><i class="fa-solid fa-arrow-left"></i></div>
+      <div class="ys-dpad-btn" style="grid-column: 3; grid-row: 2;" onmousedown="ysKeys['ArrowRight']=true;" onmouseup="ysKeys['ArrowRight']=false;" onmouseleave="ysKeys['ArrowRight']=false;" ontouchstart="ysKeys['ArrowRight']=true; event.preventDefault();" ontouchend="ysKeys['ArrowRight']=false; event.preventDefault();"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="ys-dpad-btn" style="grid-column: 2; grid-row: 3;" onmousedown="ysKeys['ArrowDown']=true;" onmouseup="ysKeys['ArrowDown']=false;" onmouseleave="ysKeys['ArrowDown']=false;" ontouchstart="ysKeys['ArrowDown']=true; event.preventDefault();" ontouchend="ysKeys['ArrowDown']=false; event.preventDefault();"><i class="fa-solid fa-arrow-down"></i></div>
+    </div>
+  </div>
+
+  <div id="page-ys-multi" class="page page-game">
+    <div class="game-top-bar">
+      <div class="game-score-text">내 보석 수량: <span id="ys-multi-my-score" style="color:#f39c12;">0</span> / 30</div>
+      <button class="game-exit-btn" onclick="exitYsMultiGame()">나가기</button>
+    </div>
+    <canvas id="ys-multi-canvas" class="ys-canvas" width="800" height="600"></canvas>
+    <div class="ys-dpad">
+      <div class="ys-dpad-btn" style="grid-column: 2; grid-row: 1;" onmousedown="ysKeys['ArrowUp']=true;" onmouseup="ysKeys['ArrowUp']=false;" onmouseleave="ysKeys['ArrowUp']=false;" ontouchstart="ysKeys['ArrowUp']=true; event.preventDefault();" ontouchend="ysKeys['ArrowUp']=false; event.preventDefault();"><i class="fa-solid fa-arrow-up"></i></div>
+      <div class="ys-dpad-btn" style="grid-column: 1; grid-row: 2;" onmousedown="ysKeys['ArrowLeft']=true;" onmouseup="ysKeys['ArrowLeft']=false;" onmouseleave="ysKeys['ArrowLeft']=false;" ontouchstart="ysKeys['ArrowLeft']=true; event.preventDefault();" ontouchend="ysKeys['ArrowLeft']=false; event.preventDefault();"><i class="fa-solid fa-arrow-left"></i></div>
+      <div class="ys-dpad-btn" style="grid-column: 3; grid-row: 2;" onmousedown="ysKeys['ArrowRight']=true;" onmouseup="ysKeys['ArrowRight']=false;" onmouseleave="ysKeys['ArrowRight']=false;" ontouchstart="ysKeys['ArrowRight']=true; event.preventDefault();" ontouchend="ysKeys['ArrowRight']=false; event.preventDefault();"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="ys-dpad-btn" style="grid-column: 2; grid-row: 3;" onmousedown="ysKeys['ArrowDown']=true;" onmouseup="ysKeys['ArrowDown']=false;" onmouseleave="ysKeys['ArrowDown']=false;" ontouchstart="ysKeys['ArrowDown']=true; event.preventDefault();" ontouchend="ysKeys['ArrowDown']=false; event.preventDefault();"><i class="fa-solid fa-arrow-down"></i></div>
+    </div>
+  </div>
+
+  <div id="page-blockblast" class="page page-game">
+    <div class="game-top-bar">
+      <div class="game-score-text" style="color:#e91e63;"><i class="fa-solid fa-cubes"></i> 블록블라스트</div>
+      <button class="game-exit-btn" onclick="exitBlockBlast()">나가기</button>
+    </div>
+    <iframe id="blockblast-iframe" src="" style="width:100%; max-width:800px; aspect-ratio:4/3; border:none; border-radius:10px; background:#fff;" allowfullscreen></iframe>
+  </div>
+
+  <div id="page-dinogame" class="page page-game">
+    <div class="game-top-bar">
+      <div class="game-score-text" style="color:#4caf50;"><i class="fa-solid fa-dragon"></i> 다이노게임 (Endless Runner)</div>
+      <button class="game-exit-btn" onclick="exitDinoGame()">나가기</button>
+    </div>
+    <iframe id="dinogame-iframe" src="" style="width:100%; max-width:800px; aspect-ratio:4/3; border:none; border-radius:10px; background:#fff;" allowfullscreen></iframe>
+  </div>
+
+  <div id="page-tetris" class="page page-game" style="background:#111; display:none;">
+    <div class="game-top-bar" style="position: absolute; top:0; left:0; right:0; z-index:10; background:#222; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333;">
+      <div class="game-score-text" style="color:#00bcd4; margin:0;"><i class="fa-solid fa-shapes"></i> 클래식 테트리스</div>
+      <button class="game-exit-btn" onclick="exitTetris()">나가기</button>
+    </div>
+    <div id="tetris-wrapper">
+      <canvas id="tetris-gameCanvas" width="200" height="400"></canvas>
+      <div id="tetris-sidebar">
+        <div class="tetris-panel"><p class="tetris-panel-label">점수</p><p class="tetris-panel-val" id="tetris-score">0</p></div>
+        <div class="tetris-panel"><p class="tetris-panel-label">레벨</p><p class="tetris-panel-val" id="tetris-level">1</p></div>
+        <div id="tetris-spinMsg"></div>
+        <div class="tetris-panel"><p class="tetris-panel-label">다음</p><canvas id="tetris-nextCanvas" width="80" height="80"></canvas></div>
+        <div class="tetris-panel" id="tetris-holdPanel"><p class="tetris-panel-label">홀드 [C/ㅊ]</p><canvas id="tetris-holdCanvas" width="80" height="80"></canvas></div>
+        <button id="tetris-btn">시작</button>
+        <div style="font-size:11px;color:#888;line-height:1.8;font-family:sans-serif;">← → 이동<br>↑ 회전<br>↓ 빠르게<br>스페이스 낙하<br>C/ㅊ 홀드</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =========================================================================
+// 기본 Firebase 인증 및 대시보드 로직
+// =========================================================================
+var firebaseConfig = { apiKey: "AlzaSyBsYbl11XCtPyUkby8GzEJHlxw_T28WNrg", authDomain: "class4-board-f6054.firebaseapp.com", databaseURL: "https://class4-board-f6054-default-rtdb.firebaseio.com/", projectId: "class4-board-f6054" };
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+const fullRosterRaw = [
+  { num: "01", name: "강필정", role: "심화" }, { num: "02", name: "계시우", role: "심화" }, { num: "03", name: "김도현", role: "일반" }, { num: "04", name: "김민성", role: "일반" }, { num: "05", name: "김범준", role: "일반" }, { num: "06", name: "김시량", role: "일반" }, { num: "07", name: "김예담", role: "일반" }, { num: "08", name: "김우식", role: "일반" }, { num: "09", name: "김재준", role: "일반" }, { num: "10", name: "김재훈", role: "일반" }, { num: "11", name: "김정모", role: "일반" }, { num: "12", name: "김진규", role: "일반" }, { num: "13", name: "김진영", role: "심화" }, { num: "14", name: "김태린", role: "일반" }, { num: "15", name: "김태림", role: "일반" }, { num: "16", name: "김태환", role: "일반" }, { num: "17", name: "남궁승후", role: "심화" }, { num: "18", name: "박시우", role: "일반" }, { num: "19", name: "백동하", role: "일반" }, { num: "20", name: "서재원", role: "일반" }, { num: "21", name: "서지호", role: "심화" }, { num: "22", name: "송예성", role: "심화" }, { num: "23", name: "송지율", role: "심화" }, { num: "24", name: "오승현", role: "일반" }, { num: "25", name: "윤중근", role: "일반" }, { num: "26", name: "이건우", role: "일반" }, { num: "27", name: "이규진", role: "심화" }, { num: "28", name: "이명석", role: "일반" }, { num: "29", name: "이승우", role: "일반" }, { num: "30", name: "이유찬", role: "일반" }, { num: "31", name: "이태성", role: "일반" }, { num: "32", name: "장지후", role: "일반" }, { num: "33", name: "전서호", role: "일반" }, { num: "34", name: "정한준", role: "일반" }
+];
+const studentRoster = {};
+fullRosterRaw.forEach(student => {
+  studentRoster[student.name] = { fullName: student.num + " " + student.name, shortName: student.name, pw: "104" + student.num, role: student.role };
+});
+let loggedInUser = null; 
+let appLinks = { vote: "", survey: "" };
+let studyTimerInterval = null;
+let currentStudySeconds = 0;
+let isTimerRunning = false;
+
+let ysKeys = {};
+window.addEventListener("keydown", (e) => {
+  if(document.getElementById('page-ys-single').classList.contains('active') || document.getElementById('page-ys-multi').classList.contains('active')){
+      ysKeys[e.key] = true;
+  }
+});
+window.addEventListener("keyup", (e) => {
+  if(document.getElementById('page-ys-single').classList.contains('active') || document.getElementById('page-ys-multi').classList.contains('active')){
+      ysKeys[e.key] = false;
+  }
+});
+
+trackGlobalNotice(); checkAutoLogin();
+
+function toggleTheme() {
+  const body = document.body;
+  const currentTheme = body.getAttribute('data-theme');
+  body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+}
+
+function checkAutoLogin() {
+  const savedName = localStorage.getItem('savedStudentName');
+  if (savedName && studentRoster[savedName]) { 
+    loggedInUser = studentRoster[savedName]; 
+    enterDashboard(); 
+  } else {
+    location.href = 'index.html'; // 로그인 안되어있으면 통합 로그인 화면으로 쫓아냄
+  }
+}
+
+function enterDashboard() {
+  document.getElementById('display-name').innerText = loggedInUser.shortName + "님!";
+  document.getElementById('page-dashboard').classList.add('active');
+  
+  if (loggedInUser.role === "심화") {
+    document.getElementById('normal-controls').style.display = 'none';
+    document.getElementById('premium-controls').style.display = 'grid';
+  } else {
+    document.getElementById('normal-controls').style.display = 'grid';
+    document.getElementById('premium-controls').style.display = 'none';
+  }
+  db.ref('studyTimes/' + loggedInUser.shortName).once('value').then(snap => {
+    currentStudySeconds = snap.val() || 0;
+    updateTimerDisplay();
+  });
+
+  trackMyStatus(); trackSystemConfig(); listenToMessages(); trackSecretNotices(); listenForForceLogout(); listenForSeatSwapEvent(); trackMySeat();
+}
+
+function processLogout() {
+  if(confirm("로그아웃 하시겠습니까?")) { stopStudyTimer(); localStorage.removeItem('savedStudentName'); location.href = 'index.html'; }
+}
+
+// 모바일 학생증 열기 및 바코드 생성
+function openMobileId() {
+  document.getElementById('student-id-modal').classList.add('show');
+  document.getElementById('id-name').innerText = loggedInUser.shortName;
+  document.getElementById('id-number').innerText = loggedInUser.fullName.split(" ")[0]; 
+
+  db.ref('studentBarcodes/' + loggedInUser.shortName).once('value').then(snap => {
+    let barcodeValue = snap.val();
+    if (!barcodeValue) { barcodeValue = "104" + loggedInUser.fullName.split(" ")[0] + "0000"; }
+    JsBarcode("#barcode-canvas", barcodeValue, {
+      format: "CODE128",
+      lineColor: "#000",
+      width: 2,
+      height: 40,
+      displayValue: true
+    });
+  });
+}
+
+function toggleStudyTimer() {
+  if (!loggedInUser) return;
+  const btn = document.getElementById('timer-toggle-btn');
+  if (!isTimerRunning) {
+    isTimerRunning = true;
+    btn.innerText = "공부 일시정지";
+    btn.classList.add('running');
+    studyTimerInterval = setInterval(() => {
+      currentStudySeconds++;
+      updateTimerDisplay();
+      if (currentStudySeconds % 10 === 0) db.ref('studyTimes/' + loggedInUser.shortName).set(currentStudySeconds);
+    }, 1000);
+  } else { stopStudyTimer(); }
+}
+
+function stopStudyTimer() {
+  if (!isTimerRunning) return;
+  isTimerRunning = false;
+  const btn = document.getElementById('timer-toggle-btn');
+  if(btn) { btn.innerText = "공부 시작"; btn.classList.remove('running'); }
+  clearInterval(studyTimerInterval);
+  if(loggedInUser) db.ref('studyTimes/' + loggedInUser.shortName).set(currentStudySeconds);
+}
+
+function updateTimerDisplay() {
+  const hrs = String(Math.floor(currentStudySeconds / 3600)).padStart(2, '0');
+  const mins = String(Math.floor((currentStudySeconds % 3600) / 60)).padStart(2, '0');
+  const secs = String(currentStudySeconds % 60).padStart(2, '0');
+  document.getElementById('timer-time').innerText = `${hrs}:${mins}:${secs}`;
+}
+
+function openSongModal() { closeExtraMenuModal(); document.getElementById('song-modal').classList.add('show'); }
+function closeSongModal() { document.getElementById('song-modal').classList.remove('show'); document.getElementById('song-title-input').value = ""; document.getElementById('song-artist-input').value = ""; }
+function submitSong() {
+  const title = document.getElementById('song-title-input').value.trim();
+  const artist = document.getElementById('song-artist-input').value.trim();
+  if(!title || !artist) { alert("제목과 가수를 모두 입력해주세요!"); return; }
+  db.ref('songRequests').push({ author: loggedInUser.shortName, title: title, artist: artist, timestamp: Date.now() }).then(() => {
+    alert("✅ 신청곡이 접수되었습니다! (쉬는 시간에 재생)"); closeSongModal();
+  });
+}
+
+function listenForSeatSwapEvent() {
+  db.ref('seatSwapEvent/status').on('value', snap => {
+    if (snap.val() === 'asking') {
+      db.ref('seatSwapEvent/responses/' + loggedInUser.shortName).once('value').then(rSnap => {
+        if (!rSnap.exists()) {
+          const preferFront = confirm("🪑 자리 바꾸기가 시작되었습니다!\n\n시력 저하, 집중 등의 이유로 [앞자리]를 신청하시겠습니까?");
+          db.ref('seatSwapEvent/responses/' + loggedInUser.shortName).set(preferFront ? 'front' : 'back');
+        }
+      });
+    }
+  });
+}
+
+function trackMySeat() {
+  db.ref('currentSeats').on('value', snap => {
+    if (!loggedInUser) return;
+    const seats = snap.val() || {}; let mySeat = "지정되지 않음";
+    for (let pos in seats) { if (seats[pos] === loggedInUser.shortName) { mySeat = pos; break; } }
+    document.getElementById('my-seat-display').innerText = `🪑 내 자리: ${mySeat}`;
+  });
+}
+
+function listenForForceLogout() {
+  db.ref('forceLogout/' + loggedInUser.shortName).on('value', snap => {
+    if (snap.exists()) { db.ref('forceLogout/' + loggedInUser.shortName).remove(); localStorage.removeItem('savedStudentName'); alert("관리자에 의해 강제 로그아웃 되었습니다."); location.href = 'index.html'; }
+  });
+}
+
+function writeClassNotice() {
+  const text = prompt("학급 공지사항을 입력하세요:");
+  if(text && text.trim() !== "") { db.ref('classNotices').push({ author: loggedInUser.shortName, text: text.trim(), timestamp: Date.now() }); }
+}
+
+function trackGlobalNotice() {
+  db.ref('config/studentNotice').on('value', snap => {
+    const noticeText = snap.val(); const pinned = document.getElementById('pinned-notice');
+    if (noticeText) { pinned.innerText = "📌 " + noticeText; pinned.style.display = 'block'; } else { pinned.style.display = 'none'; }
+  });
+  db.ref('classNotices').limitToLast(5).on('value', snap => {
+    const list = document.getElementById('student-notices-list'); list.innerHTML = ""; let hasNotice = false; let arr = [];
+    snap.forEach(child => arr.push(child.val()));
+    arr.reverse().forEach(data => {
+      hasNotice = true;
+      list.innerHTML += `<div style="background:rgba(255,255,255,0.05); padding:8px 10px; border-radius:8px; border:1px solid var(--border-light); margin-bottom:5px;"><span style="font-size:11px; color:var(--accent-purple); font-weight:bold;">${data.author}</span><br><span style="color:var(--text-main);">${data.text}</span></div>`;
+    });
+    if(!hasNotice && document.getElementById('pinned-notice').style.display === 'none') list.innerHTML = "등록된 공지가 없습니다.";
+  });
+}
+
+function trackMyStatus() {
+  db.ref('studentStates/' + loggedInUser.fullName).on('value', snap => {
+    let currentStatus = snap.val() || "출석";
+    const statusView = document.getElementById('my-status-text'); statusView.innerText = currentStatus;
+    if (currentStatus.includes("출석") || currentStatus.includes("자습")) statusView.style.color = "var(--status-green)";
+    else if (currentStatus.includes("결석") || currentStatus.includes("조퇴")) statusView.style.color = "var(--status-red)";
+    else statusView.style.color = "var(--status-orange)";
+  });
+}
+
+function changeMyState(targetState) {
+  if (targetState === '기타') { const customReason = prompt("사유 입력:"); if (!customReason) return; targetState = "기타(" + customReason + ")"; }
+  db.ref('studentStates/' + loggedInUser.fullName).set(targetState).then(() => alert("✅ 상태가 업데이트 되었습니다."));
+}
+
+function trackSystemConfig() {
+  db.ref('config').on('value', snap => { const conf = snap.val() || {}; appLinks.vote = conf.voteLink || ""; appLinks.survey = conf.surveyLink || ""; });
+}
+
+function sendMessageAction() {
+  const msgInput = document.getElementById('chat-message'); const nickInput = document.getElementById('chat-nickname');
+  const msgVal = msgInput.value.trim(); const nickVal = nickInput.value.trim() || "익명";
+  if(!msgVal) return; db.ref('messages').push({ realName: loggedInUser.fullName, nickname: nickVal, message: msgVal, timestamp: Date.now() }).then(() => { msgInput.value = ""; });
+}
+
+function listenToMessages() {
+  db.ref('messages').limitToLast(40).on('value', snap => {
+    const boardContainer = document.getElementById('chat-logs'); boardContainer.innerHTML = "";
+    snap.forEach(child => {
+      const data = child.val(); const msgRow = document.createElement('div');
+      msgRow.className = "msg-bubble" + ((data.badge||data.realName==="관리자") ? " admin" : "");
+      msgRow.innerHTML = `<span class="msg-info">${data.nickname}</span>${data.message}`;
+      boardContainer.appendChild(msgRow);
+    });
+  });
+}
+
+function trackSecretNotices() {
+  db.ref('studentNotices/' + loggedInUser.fullName).on('value', snap => {
+    const secretMsg = snap.val(); if (secretMsg) { alert("💌 [알림]\n\n" + secretMsg); db.ref('studentNotices/' + loggedInUser.fullName).remove(); }
+  });
+}
+
+function openExtraMenuModal() { document.getElementById('extra-menu-modal').classList.add('show'); }
+function closeExtraMenuModal() { document.getElementById('extra-menu-modal').classList.remove('show'); }
+function openAppLink(type) { const link = appLinks[type]; if (link) window.open(link, '_blank'); else alert("등록된 항목이 없습니다."); closeExtraMenuModal(); }
+function openInquiryModalFromMenu() { closeExtraMenuModal(); document.getElementById('inquiry-modal').classList.add('show'); }
+function closeInquiryModal() { document.getElementById('inquiry-modal').classList.remove('show'); }
+function submitInquiry() {
+  const text = document.getElementById('inquiry-text').value.trim(); if(!text) return;
+  db.ref('inquiries').push({ author: loggedInUser.shortName, text: text, timestamp: Date.now() }).then(() => { alert("전달되었습니다."); closeInquiryModal(); });
+}
+
+function getRandomClassmate() { return fullRosterRaw[Math.floor(Math.random() * fullRosterRaw.length)].name; }
+
+function openYsModeModal() { document.getElementById('ys-mode-modal').classList.add('show'); }
+function closeYsModeModal() { document.getElementById('ys-mode-modal').classList.remove('show'); }
+function startYsSingleFromModal() { closeYsModeModal(); enterYsSingleGame(); }
+function startYsMultiFromModal() { closeYsModeModal(); enterYsMultiGame(); }
+
+// =========================================================================
+// 예성스타즈 로직 (싱글/멀티)
+// =========================================================================
+let singleAnimId; let singlePlayer; let singleBots = []; let singleGems = []; let singleMyTeamGems = 0; let singleEnemyTeamGems = 0; let singleIsPlaying = false; let singleGemInterval;
+class SingleCharacter {
+  constructor(name, x, y, isEnemy, ctx, canvas) {
+    this.name = name; this.x = x; this.y = y; this.isEnemy = isEnemy; this.color = isEnemy ? "#e74c3c" : "#3498db"; this.ctx = ctx; this.canvas = canvas;
+  }
+  draw() {
+    this.ctx.beginPath(); this.ctx.arc(this.x, this.y, 20, 0, Math.PI * 2); this.ctx.fillStyle = this.color; this.ctx.fill(); this.ctx.strokeStyle = "black"; this.ctx.lineWidth = 2; this.ctx.stroke(); this.ctx.fillStyle = "white"; this.ctx.font = "14px 'Pretendard', sans-serif"; this.ctx.textAlign = "center"; this.ctx.fillText(this.name, this.x, this.y - 25);
+  }
+  move(dx, dy) {
+    this.x += dx; this.y += dy; if (this.x < 20) this.x = 20; if (this.x > this.canvas.width - 20) this.x = this.canvas.width - 20; if (this.y < 20) this.y = 20; if (this.y > this.canvas.height - 20) this.y = this.canvas.height - 20;
+  }
+  botAI() {
+    if (singleGems.length === 0) return; let closestGem = singleGems[0]; let minDist = Infinity;
+    singleGems.forEach(gem => { let dist = Math.hypot(gem.x - this.x, gem.y - this.y); if (dist < minDist) { minDist = dist; closestGem = gem; } });
+    let angle = Math.atan2(closestGem.y - this.y, closestGem.x - this.x); this.move(Math.cos(angle) * 4 * 0.8, Math.sin(angle) * 4 * 0.8);
+  }
+}
+function enterYsSingleGame() {
+  document.getElementById('page-dashboard').classList.remove('active'); document.getElementById('page-ys-single').classList.add('active');
+  const canvas = document.getElementById("ys-single-canvas"); const ctx = canvas.getContext("2d"); singleMyTeamGems = 0; singleEnemyTeamGems = 0; document.getElementById("ys-single-my-score").innerText = 0; document.getElementById("ys-single-enemy-score").innerText = 0; singleGems = []; singleBots = [];
+  let myBrawlerName = `${getRandomClassmate()}(player: ${loggedInUser.shortName})`;
+  singlePlayer = new SingleCharacter(myBrawlerName, canvas.width/2, canvas.height-50, false, ctx, canvas);
+  for(let i=0; i<3; i++) { singleBots.push(new SingleCharacter(getRandomClassmate(), Math.random() * canvas.width, 50, true, ctx, canvas)); }
+  singleIsPlaying = true;
+  singleGemInterval = setInterval(() => { if(singleGems.length < 20) singleGems.push({x: Math.random()*(canvas.width-60)+30, y: Math.random()*(canvas.height-60)+30}); }, 500);
+  singleAnimId = requestAnimationFrame(singleGameLoop);
+}
+function singleGameLoop() {
+  if (!singleIsPlaying) return; const canvas = document.getElementById("ys-single-canvas"); const ctx = canvas.getContext("2d"); ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#9b59b6"; ctx.strokeStyle = "white";
+  for (let i = singleGems.length - 1; i >= 0; i--) {
+    let gem = singleGems[i]; ctx.beginPath(); ctx.moveTo(gem.x, gem.y - 10); ctx.lineTo(gem.x + 10, gem.y); ctx.lineTo(gem.x, gem.y + 10); ctx.lineTo(gem.x - 10, gem.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+    let pDist = Math.hypot(singlePlayer.x - gem.x, singlePlayer.y - gem.y);
+    if (pDist < 30) { singleMyTeamGems++; document.getElementById("ys-single-my-score").innerText = singleMyTeamGems; singleGems.splice(i, 1); if(singleMyTeamGems >= 30) { singleEndGame("승리! 30개의 보석을 모았습니다!"); return; } continue; }
+    for (let bot of singleBots) { if (Math.hypot(bot.x - gem.x, bot.y - gem.y) < 30) { singleEnemyTeamGems++; document.getElementById("ys-single-enemy-score").innerText = singleEnemyTeamGems; singleGems.splice(i, 1); if(singleEnemyTeamGems >= 30) { singleEndGame("패배! 적팀이 보석 30개를 모두 모았습니다."); return; } break; } }
+  }
+  let dx = 0, dy = 0; const SPEED = 4;
+  if (ysKeys["ArrowUp"] || ysKeys["w"] || ysKeys["W"]) dy -= SPEED; if (ysKeys["ArrowDown"] || ysKeys["s"] || ysKeys["S"]) dy += SPEED; if (ysKeys["ArrowLeft"] || ysKeys["a"] || ysKeys["A"]) dx -= SPEED; if (ysKeys["ArrowRight"] || ysKeys["d"] || ysKeys["D"]) dx += SPEED; 
+  if (dx !== 0 && dy !== 0) { dx *= Math.SQRT1_2; dy *= Math.SQRT1_2; }
+  singlePlayer.move(dx, dy); singlePlayer.draw(); singleBots.forEach(bot => { bot.botAI(); bot.draw(); }); singleAnimId = requestAnimationFrame(singleGameLoop);
+}
+function singleEndGame(msg) { singleIsPlaying = false; clearInterval(singleGemInterval); setTimeout(() => { alert(msg); exitYsSingleGame(); }, 100); }
+function exitYsSingleGame() { singleIsPlaying = false; cancelAnimationFrame(singleAnimId); clearInterval(singleGemInterval); document.getElementById('page-ys-single').classList.remove('active'); document.getElementById('page-dashboard').classList.add('active'); }
+
+let multiAnimId = null; let multiPlayers = {}; let multiGems = {}; let multiMyData = { x: 400, y: 300, score: 0, name: "" }; let multiLastUpdate = 0;
+function enterYsMultiGame() {
+  document.getElementById('page-dashboard').classList.remove('active'); document.getElementById('page-ys-multi').classList.add('active');
+  multiMyData.name = `${getRandomClassmate()}(player: ${loggedInUser.shortName})`; multiMyData.x = Math.random() * 700 + 50; multiMyData.y = Math.random() * 500 + 50; multiMyData.score = 0; document.getElementById('ys-multi-my-score').innerText = multiMyData.score;
+  db.ref('ysGame/players/' + loggedInUser.shortName).onDisconnect().remove();
+  db.ref('ysGame/players').on('value', snap => { multiPlayers = snap.val() || {}; }); db.ref('ysGame/gems').on('value', snap => { multiGems = snap.val() || {}; });
+  db.ref('ysGame/winner').on('value', snap => { const winner = snap.val(); if(winner) { alert(`🏆 ${winner}님이 30개의 보석을 모아 승리했습니다!`); multiMyData.score = 0; document.getElementById('ys-multi-my-score').innerText = 0; multiMyData.x = Math.random() * 700 + 50; multiMyData.y = Math.random() * 500 + 50; if(winner === multiMyData.name) { setTimeout(() => { db.ref('ysGame/winner').remove(); db.ref('ysGame/gems').remove(); }, 2000); } } });
+  db.ref('ysGame/players/' + loggedInUser.shortName).set(multiMyData); multiAnimId = requestAnimationFrame(multiGameLoop);
+}
+function exitYsMultiGame() { cancelAnimationFrame(multiAnimId); if(loggedInUser) { db.ref('ysGame/players/' + loggedInUser.shortName).remove(); db.ref('ysGame/players/' + loggedInUser.shortName).onDisconnect().cancel(); } db.ref('ysGame/players').off('value'); db.ref('ysGame/gems').off('value'); db.ref('ysGame/winner').off('value'); document.getElementById('page-ys-multi').classList.remove('active'); document.getElementById('page-dashboard').classList.add('active'); }
+function multiGameLoop(timestamp) {
+  if(!document.getElementById('page-ys-multi').classList.contains('active')) return;
+  const canvas = document.getElementById('ys-multi-canvas'); const ctx = canvas.getContext('2d');
+  let dx = 0, dy = 0; const SPEED = 4; const RADIUS = 20;
+  if (ysKeys["ArrowUp"] || ysKeys["w"] || ysKeys["W"]) dy -= SPEED; if (ysKeys["ArrowDown"] || ysKeys["s"] || ysKeys["S"]) dy += SPEED; if (ysKeys["ArrowLeft"] || ysKeys["a"] || ysKeys["A"]) dx -= SPEED; if (ysKeys["ArrowRight"] || ysKeys["d"] || ysKeys["D"]) dx += SPEED;
+  if (dx !== 0 && dy !== 0) { dx *= Math.SQRT1_2; dy *= Math.SQRT1_2; }
+  multiMyData.x += dx; multiMyData.y += dy; if (multiMyData.x < RADIUS) multiMyData.x = RADIUS; if (multiMyData.x > canvas.width - RADIUS) multiMyData.x = canvas.width - RADIUS; if (multiMyData.y < RADIUS) multiMyData.y = RADIUS; if (multiMyData.y > canvas.height - RADIUS) multiMyData.y = canvas.height - RADIUS;
+  if (timestamp - multiLastUpdate > 100) { db.ref('ysGame/players/' + loggedInUser.shortName).set(multiMyData); multiLastUpdate = timestamp; const playerKeys = Object.keys(multiPlayers).sort(); if (playerKeys[0] === loggedInUser.shortName) { if (Object.keys(multiGems).length < 20 && Math.random() < 0.2) { db.ref('ysGame/gems').push({ x: Math.random() * (canvas.width - 60) + 30, y: Math.random() * (canvas.height - 60) + 30 }); } } }
+  ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#9b59b6"; ctx.strokeStyle = "white";
+  for (let gemId in multiGems) {
+    let gem = multiGems[gemId]; ctx.beginPath(); ctx.moveTo(gem.x, gem.y - 10); ctx.lineTo(gem.x + 10, gem.y); ctx.lineTo(gem.x, gem.y + 10); ctx.lineTo(gem.x - 10, gem.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+    if (Math.hypot(multiMyData.x - gem.x, multiMyData.y - gem.y) < RADIUS + 10) { db.ref('ysGame/gems/' + gemId).remove(); multiMyData.score++; document.getElementById('ys-multi-my-score').innerText = multiMyData.score; if(multiMyData.score >= 30) { db.ref('ysGame/winner').set(multiMyData.name); } }
+  }
+  for (let pId in multiPlayers) {
+    if (pId === loggedInUser.shortName) continue; let p = multiPlayers[pId]; ctx.beginPath(); ctx.arc(p.x, p.y, RADIUS, 0, Math.PI * 2); ctx.fillStyle = "#e74c3c"; ctx.fill(); ctx.strokeStyle = "black"; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = "white"; ctx.font = "14px 'Pretendard', sans-serif"; ctx.textAlign = "center"; ctx.fillText(p.name, p.x, p.y - 25); ctx.fillStyle = "#f39c12"; ctx.fillText(`💎 ${p.score}`, p.x, p.y - 45);
+  }
+  ctx.beginPath(); ctx.arc(multiMyData.x, multiMyData.y, RADIUS, 0, Math.PI * 2); ctx.fillStyle = "#3498db"; ctx.fill(); ctx.strokeStyle = "black"; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = "white"; ctx.font = "14px 'Pretendard', sans-serif"; ctx.textAlign = "center"; ctx.fillText(multiMyData.name, multiMyData.x, multiMyData.y - 25); ctx.fillStyle = "#f39c12"; ctx.fillText(`💎 ${multiMyData.score}`, multiMyData.x, multiMyData.y - 45);
+  multiAnimId = requestAnimationFrame(multiGameLoop);
+}
+
+// =========================================================================
+// 타 외부 게임 구동 로직
+// =========================================================================
+function enterBlockBlast() { document.getElementById('page-dashboard').classList.remove('active'); document.getElementById('page-blockblast').classList.add('active'); document.getElementById('blockblast-iframe').src = "https://aayanaqdas.github.io/block_blast/"; }
+function exitBlockBlast() { document.getElementById('blockblast-iframe').src = ""; document.getElementById('page-blockblast').classList.remove('active'); document.getElementById('page-dashboard').classList.add('active'); }
+function enterDinoGame() { document.getElementById('page-dashboard').classList.remove('active'); document.getElementById('page-dinogame').classList.add('active'); document.getElementById('dinogame-iframe').src = "https://wayou.github.io/t-rex-runner/"; }
+function exitDinoGame() { document.getElementById('dinogame-iframe').src = ""; document.getElementById('page-dinogame').classList.remove('active'); document.getElementById('page-dashboard').classList.add('active'); }
+
+// 테트리스 구동 로직
+function enterTetris() {
+  document.getElementById('page-dashboard').classList.remove('active');
+  document.getElementById('page-tetris').classList.add('active');
+  document.getElementById('page-tetris').style.display = 'flex';
+  if(typeof window.initTetris === 'function') window.initTetris();
+}
+function exitTetris() {
+  document.getElementById('page-tetris').classList.remove('active');
+  document.getElementById('page-tetris').style.display = 'none';
+  document.getElementById('page-dashboard').classList.add('active');
+  if(typeof window.pauseTetris === 'function') window.pauseTetris();
+}
+
+// 내장 테트리스 게임 스크립트 
+(function() {
+  const canvas = document.getElementById('tetris-gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const nCtx = document.getElementById('tetris-nextCanvas').getContext('2d');
+  const hCtx = document.getElementById('tetris-holdCanvas').getContext('2d');
+  const holdPanel = document.getElementById('tetris-holdPanel');
+  const spinMsg = document.getElementById('tetris-spinMsg');
+
+  const COLS=10, ROWS=20, SZ=20;
+  const COLORS = ['#00e5ff','#ffab00','#aa00ff','#00e676','#ff1744','#2979ff','#ffee58'];
+  const SHAPES = [ [[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]], [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]] ];
+
+  const WK = { '0>1': [[ 0,0],[-1,0],[-1, 1],[0,-2],[-1,-2]], '1>2': [[ 0,0],[ 1,0],[ 1,-1],[0, 2],[ 1, 2]], '2>3': [[ 0,0],[ 1,0],[ 1, 1],[0,-2],[ 1,-2]], '3>0': [[ 0,0],[-1,0],[-1,-1],[0, 2],[-1, 2]] };
+  const WK_I = { '0>1': [[ 0,0],[-2,0],[ 1,0],[-2,-1],[ 1, 2]], '1>2': [[ 0,0],[-1,0],[ 2,0],[-1, 2],[ 2,-1]], '2>3': [[ 0,0],[ 2,0],[-1,0],[ 2, 1],[-1,-2]], '3>0': [[ 0,0],[ 1,0],[-2,0],[ 1,-2],[-2, 1]] };
+
+  let board, piece, nextIdx, holdIdx, holdUsed;
+  let score=0, level=1, lines=0, gameOver=false, paused=false, dropTimer, speed=550;
+  let lastKickIdx = -1; let spinMsgTimer = null;
+  const DAS=150, ARR=50;
+  let dasL={active:false,t:null,i:null}, dasR={active:false,t:null,i:null};
+  let isInitialized = false;
+
+  function newBoard(){ return Array.from({length:ROWS},()=>Array(COLS).fill(0)); }
+  function makePiece(idx){ const shape = SHAPES[idx].map(r=>[...r]); return { idx, shape, color:COLORS[idx], x:Math.floor((COLS-shape[0].length)/2), y:0, rot:0 }; }
+  function valid(shape, px, py){ for(let r=0;r<shape.length;r++) for(let c=0;c<shape[r].length;c++) if(shape[r][c]){ const nr=r+py, nc=c+px; if(nr<0||nr>=ROWS||nc<0||nc>=COLS||board[nr][nc]) return false; } return true; }
+
+  function tryRotate(){
+    const nextRot = (piece.rot+1)%4; const key = piece.rot+'>'+nextRot; const kicks = piece.idx===0 ? WK_I[key] : WK[key];
+    const rotated = piece.shape[0].map((_,i)=>piece.shape.map(r=>r[i]).reverse());
+    for(let i=0;i<kicks.length;i++){
+      const [dx,dy] = kicks[i]; const nx = piece.x+dx, ny = piece.y-dy;
+      if(valid(rotated,nx,ny)){ piece.shape=rotated; piece.x=nx; piece.y=ny; piece.rot=nextRot; lastKickIdx=i; return true; }
+    }
+    return false;
+  }
+
+  function isTSpin(){
+    if(piece.idx!==2 || lastKickIdx<0) return false;
+    const corners=[ [piece.y,piece.x], [piece.y,piece.x+2], [piece.y+2,piece.x], [piece.y+2,piece.x+2] ]; let blocked=0;
+    for(const [r,c] of corners){ if(r<0||r>=ROWS||c<0||c>=COLS||board[r][c]) blocked++; }
+    return lastKickIdx>=1 ? blocked>=2 : blocked>=3;
+  }
+
+  function showSpinMsg(msg){ clearTimeout(spinMsgTimer); spinMsg.textContent=msg; spinMsgTimer=setTimeout(()=>spinMsg.textContent='',1800); }
+  function isHoldKey(e){ return ['c','C','ㅊ'].includes(e.key); }
+
+  function doHold(){
+    if(holdUsed) return; holdUsed=true; holdPanel.classList.add('used'); lastKickIdx=-1;
+    if(holdIdx===null){ holdIdx=piece.idx; piece=makePiece(nextIdx); nextIdx=Math.floor(Math.random()*7); }
+    else { const tmp=holdIdx; holdIdx=piece.idx; piece=makePiece(tmp); }
+    render();
+  }
+
+  function lockPiece(){
+    const tspin=isTSpin();
+    piece.shape.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v) board[ri+piece.y][ci+piece.x]=piece.color; }));
+    let cleared=0;
+    for(let r=ROWS-1;r>=0;){ if(board[r].every(c=>c)){ board.splice(r,1); board.unshift(Array(COLS).fill(0)); cleared++; } else r--; }
+    if(tspin&&cleared>0){ score+=[0,400,800,1200][cleared]*level; showSpinMsg(['','T-Spin Single!','T-Spin Double!','T-Spin Triple!'][cleared]); } 
+    else if(tspin){ score+=100*level; showSpinMsg('T-Spin!'); } 
+    else if(cleared>0){ score+=[0,100,300,500,800][cleared]*level; if(cleared===4) showSpinMsg('Tetris!'); }
+    if(cleared>0){ lines+=cleared; level=Math.floor(lines/10)+1; speed=Math.max(100,600-level*50); restartDrop(); }
+    lastKickIdx=-1; holdUsed=false; holdPanel.classList.remove('used');
+    piece=makePiece(nextIdx); nextIdx=Math.floor(Math.random()*7);
+    if(!valid(piece.shape,piece.x,piece.y)){ gameOver=true; clearInterval(dropTimer); document.getElementById('tetris-btn').textContent='다시 시작'; }
+  }
+
+  function drop(){ if(valid(piece.shape,piece.x,piece.y+1)){ piece.y++; lastKickIdx=-1; } else lockPiece(); render(); }
+  function hardDrop(){ while(valid(piece.shape,piece.x,piece.y+1)){ piece.y++; lastKickIdx=-1; } lockPiece(); render(); }
+  function ghostY(){ let g=piece.y; while(valid(piece.shape,piece.x,g+1)) g++; return g; }
+  function moveL(){ if(!board||gameOver||paused) return; if(valid(piece.shape,piece.x-1,piece.y)){piece.x--;lastKickIdx=-1;render();} }
+  function moveR(){ if(!board||gameOver||paused) return; if(valid(piece.shape,piece.x+1,piece.y)){piece.x++;lastKickIdx=-1;render();} }
+  function clearDas(d){ clearTimeout(d.t);clearInterval(d.i);d.t=null;d.i=null;d.active=false; }
+  function startDas(d,fn){ clearDas(d);d.active=true;fn();d.t=setTimeout(()=>{ if(!d.active)return; d.i=setInterval(()=>{ if(d.active)fn();else clearInterval(d.i); },ARR); },DAS); }
+
+  function drawBlock(c,x,y,color,alpha){
+    c.save(); c.globalAlpha=alpha??1; c.fillStyle=color; c.fillRect(x*SZ+1,y*SZ+1,SZ-2,SZ-2);
+    c.fillStyle='rgba(255,255,255,0.28)'; c.fillRect(x*SZ+1,y*SZ+1,SZ-2,2); c.fillRect(x*SZ+1,y*SZ+1,2,SZ-2); c.restore();
+  }
+  function drawPreview(c,idx){
+    c.fillStyle='#1a1a2e'; c.fillRect(0,0,80,80); if(idx===null||idx===undefined) return;
+    const shape=SHAPES[idx],color=COLORS[idx]; const ox=Math.floor((4-shape[0].length)/2),oy=Math.floor((4-shape.length)/2);
+    shape.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v) drawBlock(c,ci+ox,ri+oy,color,1); }));
+  }
+  function render(){
+    if(!board) return;
+    ctx.fillStyle='#1a1a2e'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=0.5;
+    for(let r=0;r<ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*SZ);ctx.lineTo(COLS*SZ,r*SZ);ctx.stroke();}
+    for(let c=0;c<COLS;c++){ctx.beginPath();ctx.moveTo(c*SZ,0);ctx.lineTo(c*SZ,ROWS*SZ);ctx.stroke();}
+    board.forEach((row,ri)=>row.forEach((color,ci)=>{ if(color) drawBlock(ctx,ci,ri,color,1); }));
+    if(!gameOver&&piece){
+      const gy=ghostY();
+      if(gy!==piece.y) piece.shape.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v) drawBlock(ctx,ci+piece.x,ri+gy,piece.color,0.2); }));
+      piece.shape.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v) drawBlock(ctx,ci+piece.x,ri+piece.y,piece.color,1); }));
+    }
+    if(gameOver){
+      ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,140,200,100);
+      ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center'; ctx.fillText('GAME OVER',100,180);
+      ctx.font='14px sans-serif'; ctx.fillStyle='#aaa'; ctx.fillText('점수: '+score,100,205);
+    }
+    document.getElementById('tetris-score').textContent=score;
+    document.getElementById('tetris-level').textContent=level;
+    drawPreview(nCtx,nextIdx); drawPreview(hCtx,holdIdx);
+  }
+  function restartDrop(){ clearInterval(dropTimer); dropTimer=setInterval(()=>{ if(!paused&&!gameOver) drop(); },speed); }
+
+  const SCROLL=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '];
+  window.addEventListener('keydown',e=>{ 
+    if(!document.getElementById('page-tetris').classList.contains('active')) return;
+    if(SCROLL.includes(e.key)) e.preventDefault(); 
+  },{passive:false});
+  
+  window.addEventListener('keydown',e=>{
+    if(!document.getElementById('page-tetris').classList.contains('active')) return;
+    if(isHoldKey(e)){ if(board&&!gameOver&&!paused) doHold(); return; }
+    if(!board||gameOver||paused) return;
+    if(e.key==='ArrowLeft'){ if(!dasL.active) startDas(dasL,moveL); }
+    else if(e.key==='ArrowRight'){ if(!dasR.active) startDas(dasR,moveR); }
+    else if(e.key==='ArrowDown'){ drop(); restartDrop(); }
+    else if(e.key==='ArrowUp'){ if(tryRotate()) render(); }
+    else if(e.key===' '){ hardDrop(); restartDrop(); }
+  });
+  window.addEventListener('keyup',e=>{
+    if(!document.getElementById('page-tetris').classList.contains('active')) return;
+    if(e.key==='ArrowLeft') clearDas(dasL);
+    else if(e.key==='ArrowRight') clearDas(dasR);
+  });
+
+  function startGame(){
+    clearInterval(dropTimer); clearDas(dasL); clearDas(dasR);
+    board=newBoard(); holdIdx=null; holdUsed=false; lastKickIdx=-1;
+    holdPanel.classList.remove('used'); spinMsg.textContent='';
+    score=0; level=1; lines=0; speed=550; gameOver=false; paused=false;
+    piece=makePiece(Math.floor(Math.random()*7)); nextIdx=Math.floor(Math.random()*7);
+    dropTimer=setInterval(()=>{ if(!paused&&!gameOver) drop(); },speed);
+    document.getElementById('tetris-btn').textContent='일시정지';
+    render();
+  }
+  document.getElementById('tetris-btn').addEventListener('click',()=>{
+    if(gameOver||!board){ startGame(); }
+    else{ paused=!paused; document.getElementById('tetris-btn').textContent=paused?'계속하기':'일시정지'; }
+  });
+
+  window.initTetris = function() {
+    if(!isInitialized) { isInitialized = true; board=newBoard(); render(); }
+  }
+  window.pauseTetris = function() {
+    if(board && !gameOver && !paused) { paused = true; document.getElementById('tetris-btn').textContent='계속하기'; }
+  }
+})();
+</script>
+</body>
+</html>
