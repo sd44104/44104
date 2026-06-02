@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class104 Enterprise ERP</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+:root { 
+  --bg-color: #F2F4F6; --card-bg: #FFFFFF; --sidebar-bg: #FFFFFF; --sidebar-hover: #F2F4F6; --sidebar-text: #6B7684; --sidebar-active: #3182F6;
+  --text-main: #191F28; --text-muted: #8B95A1; --border-color: #E5E8EB; --status-red: #F04452; --status-green: #34C759;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+body { background-color: var(--bg-color); color: var(--text-main); user-select: none; overflow: hidden; height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+
+/* ---------------- 로그인 오버레이 ---------------- */
+#admin-login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+.admin-login-box { background: #fff; padding: 40px; border-radius: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 360px; border: 1px solid var(--border-color); }
+
+/* Sidebar */
+#view-app { display: none; width: 100%; height: 100vh; flex-direction: row; }
+.app-sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; z-index: 10;}
+.sidebar-header { padding: 25px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
+.sidebar-header i { font-size: 24px; color: var(--sidebar-active); }
+.sidebar-header h1 { font-size: 18px; font-weight: 800; color: var(--text-main); margin:0; }
+
+.sidebar-menu { flex: 1; overflow-y: auto; padding: 20px 10px; display: flex; flex-direction: column; gap: 4px; }
+.menu-group { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 15px 0 5px 15px; }
+.menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; cursor: pointer; color: var(--sidebar-text); font-size: 15px; font-weight: 600; transition: 0.2s; }
+.menu-item:hover { background: var(--sidebar-hover); color: var(--text-main); }
+.menu-item.active { background: #E8F3FF; color: var(--sidebar-active); font-weight: 700; }
+.menu-item i { width: 20px; text-align: center; font-size: 16px; }
+
+.sidebar-profile { padding: 20px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; cursor: pointer; background: var(--sidebar-bg); }
+.sb-profile-img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--bg-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 20px; border: 1px solid var(--border-color); }
+.sb-profile-info { flex: 1; overflow: hidden; }
+.sb-profile-name { font-size: 15px; font-weight: 700; color: var(--text-main); }
+.sb-profile-role { font-size: 13px; color: var(--sidebar-text); margin-top: 2px; }
+.btn-logout-icon { color: var(--text-muted); cursor: pointer; transition: 0.2s; padding: 5px; }
+.btn-logout-icon:hover { color: var(--status-red); }
+
+/* Main Content Area */
+.app-main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.app-header { background: var(--card-bg); height: 70px; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.03); z-index: 5;}
+.header-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
+.app-content { flex: 1; overflow-y: auto; padding: 40px; }
+.page { display: none; max-width: 1200px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Shared Components */
+.dash-panel { background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid var(--border-color); }
+.panel-title { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 20px; }
+.login-input { width: 100%; padding: 16px; margin-bottom: 15px; background: var(--bg-color); border: none; color: var(--text-main); border-radius: 12px; font-size: 15px; outline: none; font-weight: 500; transition: 0.2s; }
+.login-input:focus { box-shadow: 0 0 0 2px var(--sidebar-active) inset; background: #FFF; }
+.btn-prime { padding: 14px 24px; background: var(--sidebar-active); border: none; color: #FFF; font-weight: 700; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 15px; }
+.btn-prime:hover { background: #1B64DA; }
+.btn-action { padding: 10px 16px; background: var(--bg-color); border: none; color: var(--text-main); border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+.btn-action:hover { background: #E5E8EB; }
+.data-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+.data-table th, .data-table td { padding: 18px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 15px; }
+.data-table th { background: var(--bg-color); color: var(--text-muted); font-weight: 700; }
+
+/* Dashboard Layout */
+.dash-row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+.stat-card { background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid var(--border-color);}
+.stat-card-header { font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; }
+.stat-card-value { font-size: 32px; font-weight: 800; color: var(--sidebar-active); }
+
+/* Switch */
+.toggle-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+.switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 34px; transition: .3s; }
+.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+input:checked + .slider { background-color: var(--sidebar-active); }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Attendance */
+.student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-top: 15px;}
+.student-card { background: var(--bg-color); padding: 15px 5px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: 700; color: var(--text-main); }
+.student-card:hover { background: #E5E8EB; }
+.student-card.selected { background: #E8F3FF; color: var(--sidebar-active); box-shadow: 0 0 0 2px var(--sidebar-active) inset; }
+.status-badge { display: block; font-size: 12px; margin-top: 6px; color: var(--text-muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div id="admin-login-overlay">
+  <div class="admin-login-box">
+    <h2 style="font-size: 22px; font-weight: 800; color: var(--sidebar-active); margin-bottom: 25px;"><i class="fa-solid fa-lock"></i> ERP 시스템 접근</h2>
+    <input type="text" id="admin-login-id" class="login-input" placeholder="관리자 ID (이름 입력)">
+    <input type="password" id="admin-login-pw" class="login-input" placeholder="비밀번호" onkeydown="if(event.keyCode==13) attemptAdminLogin()">
+    <button class="btn-prime" style="width: 100%; margin-top: 10px;" onclick="attemptAdminLogin()">로그인 승인</button>
+    <button class="btn-action" style="width: 100%; margin-top: 10px;" onclick="location.href='index.html'">학생 페이지로 돌아가기</button>
+  </div>
+</div>
+
+<div id="view-app">
+  <aside class="app-sidebar">
+    <div class="sidebar-header" onclick="switchPage('page-dashboard', document.querySelector('.menu-item'), '대시보드 상황판')">
+      <i class="fa-solid fa-layer-group"></i><h1>Class104 ERP</h1>
+    </div>
+    
+    <div class="sidebar-menu">
+      <div class="menu-group">Core Operations</div>
+      <div class="menu-item active" onclick="switchPage('page-dashboard', this, '대시보드 상황판')"><i class="fa-solid fa-chart-pie"></i><span>대시보드</span></div>
+      <div class="menu-item" onclick="switchPage('page-attendance', this, '근태/출석 관리')"><i class="fa-solid fa-clipboard-user"></i><span>출석 현황</span></div>
+      <div class="menu-item" onclick="switchPage('page-notice', this, '공지사항 송출망')"><i class="fa-solid fa-tower-broadcast"></i><span>공지사항</span></div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="sb-profile-info">
+        <div class="sb-profile-name" id="admin-name-txt">사용자</div>
+        <div class="sb-profile-role" id="admin-role-txt">시스템 관리자</div>
+      </div>
+      <i class="fa-solid fa-power-off btn-logout-icon" title="로그아웃" onclick="handleLogout()"></i>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <header class="app-header"><div class="header-title" id="top-header-title">대시보드 상황판</div></header>
+    <div class="app-content">
+      
+      <div id="page-dashboard" class="page active">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-card-header">총 인원</div><div class="stat-card-value">34</div></div>
+          <div class="stat-card"><div class="stat-card-header">현재 출석</div><div class="stat-card-value" id="dash-stat-present" style="color:var(--status-green);">0</div></div>
+          <div class="stat-card"><div class="stat-card-header">이동/외부</div><div class="stat-card-value" id="dash-stat-study">0</div></div>
+          <div class="stat-card"><div class="stat-card-header">결석/조퇴</div><div class="stat-card-value" id="dash-stat-absent" style="color:var(--status-red);">0</div></div>
+        </div>
+        <div class="dash-row-2">
+          <div class="dash-panel">
+            <div class="panel-title">전광판 (스크린) 원격 제어</div>
+            <div class="toggle-row"><span>메인 스크린 켜기</span><label class="switch"><input type="checkbox" id="toggle-board" onchange="updateConfig('boardActive', !this.checked)"><span class="slider"></span></label></div>
+            <div class="toggle-row"><span>학급 커뮤니티(채팅) 활성화</span><label class="switch"><input type="checkbox" id="toggle-chat" onchange="updateConfig('chatActive', this.checked)"><span class="slider"></span></label></div>
+          </div>
+          <div class="dash-panel">
+            <div class="panel-title">바로가기 링크</div>
+            <button class="btn-action" style="width: 100%; text-align: left; margin-bottom: 10px;" onclick="window.open('dashboard.html', '_blank')"><i class="fa-solid fa-desktop" style="margin-right:8px;"></i> 메인 전광판 모니터링</button>
+            <button class="btn-action" style="width: 100%; text-align: left;" onclick="window.open('index.html', '_blank')"><i class="fa-solid fa-mobile-screen" style="margin-right:8px;"></i> 학생용 앱 접속</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-attendance" class="page">
+        <div class="dash-panel">
+          <div class="panel-title">일반반 / 심화반 실시간 출석망</div>
+          <div class="student-grid" id="grid-normal"></div>
+        </div>
+      </div>
+
+      <div id="page-notice" class="page">
+        <div class="dash-panel">
+          <div class="panel-title"><i class="fa-solid fa-mobile-screen" style="color:var(--sidebar-active);"></i> 학생 앱 글로벌 배너 공지</div>
+          <p style="color:var(--text-muted); font-size:13px; margin-bottom:15px;">학생용 웹 앱 최상단에 고정으로 노출될 메시지입니다.</p>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="notice-student-input" class="login-input" style="flex:1; margin-bottom:0;" placeholder="중요 공지 내용 입력">
+            <button class="btn-prime" onclick="addStudentNotice()">배너 적용</button>
+            <button class="btn-action" style="color:var(--status-red);" onclick="clearBannerNotice()">배너 내리기</button>
+          </div>
+        </div>
+        
+        <div class="dash-panel">
+          <div class="panel-title"><i class="fa-solid fa-tv" style="color:#BF5AF2;"></i> 전광판 팝업 공지 송출</div>
+          <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="notice-billboard-input" class="login-input" style="flex:1; margin-bottom:0;" placeholder="화면에 강제 노출할 메시지 입력">
+            <button class="btn-prime" style="background:#191F28;" onclick="addBillboardNotice(false)">화면 송출</button>
+            <button class="btn-prime" style="background:#BF5AF2;" onclick="addBillboardNotice(true)">🔊 음성(TTS) 송출</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+var firebaseConfig = { apiKey: "AlzaSyBsYbl11XCtPyUkby8GzEJHlxw_T28WNrg", authDomain: "class4-board-f6054.firebaseapp.com", databaseURL: "https://class4-board-f6054-default-rtdb.firebaseio.com/", projectId: "class4-board-f6054" };
+firebase.initializeApp(firebaseConfig); var db = firebase.database();
+let currentAdminUser = "사용자";
+const studentData = [ { full: "01 강필정", role: "심화" }, { full: "02 계시우", role: "심화" }, { full: "03 김도현", role: "일반" }, { full: "04 김민성", role: "일반" }, { full: "05 김범준", role: "일반" }, { full: "06 김시량", role: "일반" }, { full: "07 김예담", role: "일반" }, { full: "08 김우식", role: "일반" }, { full: "09 김재준", role: "일반" }, { full: "10 김재훈", role: "일반" }, { full: "11 김정모", role: "일반" }, { full: "12 김진규", role: "일반" }, { full: "13 김진영", role: "심화" }, { full: "14 김태린", role: "일반" }, { full: "15 김태림", role: "일반" }, { full: "16 김태환", role: "일반" }, { full: "17 남궁승후", role: "심화" }, { full: "18 박시우", role: "일반" }, { full: "19 백동하", role: "일반" }, { full: "20 서재원", role: "일반" }, { full: "21 서지호", role: "심화" }, { full: "22 송예성", role: "심화" }, { full: "23 송지율", role: "심화" }, { full: "24 오승현", role: "일반" }, { full: "25 윤중근", role: "일반" }, { full: "26 이건우", role: "일반" }, { full: "27 이규진", role: "심화" }, { full: "28 이명석", role: "일반" }, { full: "29 이승우", role: "일반" }, { full: "30 이유찬", role: "일반" }, { full: "31 이태성", role: "일반" }, { full: "32 장지후", role: "일반" }, { full: "33 전서호", role: "일반" }, { full: "34 정한준", role: "일반" } ];
+
+window.onload = function() {
+  const loggedInUser = localStorage.getItem('adminUser');
+  if(loggedInUser) {
+    document.getElementById('admin-login-overlay').style.display = 'none';
+    document.getElementById('view-app').style.display = 'flex';
+    handleAdminEntry(loggedInUser);
+  }
+};
+
+function attemptAdminLogin() {
+  const id = document.getElementById('admin-login-id').value.trim();
+  const pw = document.getElementById('admin-login-pw').value.trim();
+  
+  // 마스터 키 하드코딩 백도어 (비상용)
+  if (id === "master" && pw === "104104") {
+      localStorage.setItem('adminUser', "Master");
+      location.reload();
+      return;
+  }
+  
+  db.ref('auth/adminAccounts/' + id).once('value').then(snap => {
+    const data = snap.val();
+    if(data && data.pw === pw) {
+      localStorage.setItem('adminUser', id);
+      location.reload();
+    } else {
+      alert("관리자 정보가 존재하지 않거나 비밀번호가 틀렸습니다.");
+    }
+  });
+}
+
+function handleAdminEntry(id) {
+  currentAdminUser = id;
+  document.getElementById('admin-name-txt').innerText = id;
+  initAdminDashboard();
+}
+
+function handleLogout() { 
+  if(confirm("안전하게 로그아웃하시겠습니까?")) { 
+    localStorage.removeItem('adminUser'); 
+    location.reload(); 
+  } 
+}
+
+function switchPage(pageId, element, title) {
+  if (element) { document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); element.classList.add('active'); }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(pageId).classList.add('active'); document.getElementById('top-header-title').innerText = title;
+}
+
+function initAdminDashboard() {
+  db.ref('config').on('value', snap => {
+    const conf = snap.val() || {};
+    document.getElementById('toggle-chat').checked = conf.chatActive !== false;
+    document.getElementById('toggle-board').checked = conf.boardActive === false; 
+  });
+
+  db.ref('studentStates').on('value', snap => {
+    const states = snap.val() || {};
+    const gridNormal = document.getElementById('grid-normal');
+    gridNormal.innerHTML = ""; 
+    let cntPresent = 0, cntAbsent = 0, cntStudy = 0;
+    studentData.forEach(st => {
+      const status = states[st.full] || "정상";
+      if(status === "출석") cntPresent++;
+      else if(status === "결석" || status === "조퇴") cntAbsent++;
+      else if(status.includes("자습") || status === "심화반") cntStudy++;
+
+      const card = document.createElement('div');
+      card.className = 'student-card';
+      card.innerHTML = `<div>${st.full.split(' ')[1]}</div><span class="status-badge">${status}</span>`;
+      gridNormal.appendChild(card);
+    });
+    document.getElementById('dash-stat-present').innerText = cntPresent;
+    document.getElementById('dash-stat-absent').innerText = cntAbsent;
+    document.getElementById('dash-stat-study').innerText = cntStudy;
+  });
+}
+
+function updateConfig(key, val) { db.ref('config/' + key).set(val); }
+function addStudentNotice() { const val = document.getElementById('notice-student-input').value.trim(); if(val) { updateConfig('studentNotice', val); document.getElementById('notice-student-input').value = ""; alert("배너 송출 완료"); } }
+function clearBannerNotice() { db.ref('config/studentNotice').set(""); alert("배너 내림 완료"); }
+function addBillboardNotice(useTTS) { const val = document.getElementById('notice-billboard-input').value.trim(); if(val) { db.ref('notices').push({ sender: currentAdminUser, message: val, timestamp: Date.now(), useTTS: useTTS }); document.getElementById('notice-billboard-input').value = ""; alert("전광판 송출 완료"); } }
+</script>
+</body>
+</html>
