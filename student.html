@@ -136,7 +136,8 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
         <input type="text" id="login-id" class="login-input" placeholder="성명 입력 (예: 홍길동)">
         <input type="password" id="login-pw" class="login-input" placeholder="비밀번호를 입력하세요" onkeydown="if(event.keyCode==13) doLogin()">
         <button class="btn-primary" onclick="doLogin()">인증 및 대시보드 진입</button>
-        </div>
+        <button class="btn-outline" style="width: 100%; margin-top: 10px; border-style: dashed;" onclick="gateToAdmin()">ERP 제어소 시스템 관리자 로그인</button>
+      </div>
     </div>
   </section>
 
@@ -187,7 +188,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
           </div>
           
           <div class="util-grid">
-            <button class="util-btn" onclick="window.open('https://sunduck.riroschool.kr', '_blank')"><i class="fa-solid fa-backpack"></i> 리로스쿨</button>
+            <button class="util-btn" onclick="window.open('https://sunduck.riroschool.kr', '_blank')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
             <button class="util-btn" onclick="window.open('https://sunduck.sen.hs.kr', '_blank')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
             <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
             <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
@@ -313,7 +314,6 @@ const fullRosterRaw = [
 const studentMap = {};
 fullRosterRaw.forEach(s => { studentMap[s.name] = { num: s.num, defaultPw: "104" + s.num, fullName: s.num + " " + s.name }; });
 
-// 요구사항 반영: 기재해주신 심화반 고유 학생 명단
 const advancedStudents = ["강필정", "계시우", "김진영", "이규진", "남궁승후", "송예성", "송지율", "서지호"];
 
 let loggedInUser = null;
@@ -333,6 +333,17 @@ const schoolTimeline = [
   { title: "6교시", start: "14:10", end: "15:00" },
   { title: "쉬는시간", start: "15:00", end: "15:10" },
   { title: "7교시", start: "15:10", end: "16:00" }
+];
+
+// 요구사항 반영: 선덕고 1학년 4반 고유 고정 시간표 하드코딩 데이터 매트릭스 설계
+const fixedSchedule = [
+  ["통합과학", "수학", "통합사회", "국어", "수학"],       // 1교시 (월, 화, 수, 목, 금)
+  ["국어", "통합과학", "체육", "한국사", "영어"],         // 2교시
+  ["수학", "영어", "국어", "미술", "통합과학"],           // 3교시
+  ["영어", "통합사회", "수학", "미술", "음악"],           // 4교시
+  ["통합사회", "진로", "영어", "과학탐구", "창체/자율"],  // 5교시
+  ["한국사", "체육", "독서", "전문교과", "창체/자율"],    // 6교시
+  ["전문교과", "음악", "보건", "동아리", "창체/자율"]     // 7교시
 ];
 
 window.onload = () => {
@@ -390,7 +401,6 @@ function initApp() {
   document.getElementById('user-name-display').innerText = loggedInUser;
   switchTab('home');
   
-  // 요구사항 반영: 로그인한 학생 명단을 대조하여 일반반/심화반 구역을 자동 필터링 노출
   if (advancedStudents.includes(loggedInUser)) {
     document.getElementById('normal-panel-zone').style.display = 'none';
     document.getElementById('advanced-panel-zone').style.display = 'block';
@@ -411,7 +421,8 @@ function initApp() {
     JsBarcode("#barcode-canvas", code, { format: "CODE128", displayValue: true, width: 2, height: 50 });
   });
 
-  fetchNeisData();
+  renderStaticTimetable();
+  fetchNeisMealData();
 }
 
 function switchTab(tabId) {
@@ -565,19 +576,73 @@ function closeGame() {
 
 const NEIS_KEY = '7be1608e99d34736b6729aab42d32665';
 const ATPT_CODE = 'B10';
-const SCHUL_CODE = 'B100000465'; // 선덕고등학교 전용 코드 고정
+// 요구사항 반영: 급식 전용 고유 나이스 해시 코드 적용
+const SCHUL_CODE = '8dcd5c5f9b0d4fdfa83caf40261ccba6';
 
-async function fetchNeisData() {
+// 요구사항 반영: 시간표 렌더링을 완전히 하드코딩 방식으로 처리
+function renderStaticTimetable() {
+  const now = new Date();
+  const day = now.getDay(); 
+  
+  const tbody = document.getElementById('timetable-body');
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  
+  fixedSchedule.forEach((row, pIdx) => {
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td style="background:#f8fafc; font-weight:700;">${pIdx + 1}교시</td>`;
+    row.forEach((subject, dIdx) => {
+      const isToday = (day - 1 === dIdx);
+      tr.innerHTML += `<td class="${isToday ? 'today' : ''}">${subject}</td>`;
+    });
+    tbody.appendChild(tr);
+  });
+
+  if(day >= 1 && day <= 5) {
+    const targetTh = document.getElementById(`th-${day}`);
+    if(targetTh) targetTh.classList.add('today');
+  }
+
+  // 하드코딩 테이블 기반 실시간 일과 모니터링 동기화 엔진
+  const calculateCurrentClassStatus = () => {
+    const tNow = new Date();
+    const currentMinutes = tNow.getHours() * 60 + tNow.getMinutes();
+    const currentDay = tNow.getDay();
+    
+    let matchedStatus = "방과 후 일과 종료 또는 주말";
+    
+    if (currentDay >= 1 && currentDay <= 5) {
+      for(let item of schoolTimeline) {
+        const startParts = item.start.split(":");
+        const endParts = item.end.split(":");
+        const startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+        const endMin = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+        
+        if(currentMinutes >= startMin && currentMinutes < endMin) {
+          if(item.title.includes("교시")) {
+            const periodIdx = parseInt(item.title.replace("교시","")) - 1;
+            const subjectName = (fixedSchedule[periodIdx] && fixedSchedule[periodIdx][currentDay-1]) ? fixedSchedule[periodIdx][currentDay-1] : "";
+            matchedStatus = `${item.title} [${subjectName || '수업'}] 진행 중`;
+          } else {
+            matchedStatus = `🍿 지금은 ${item.title}입니다!`;
+          }
+          break;
+        }
+      }
+    }
+    
+    const timeClockStr = `${String(tNow.getHours()).padStart(2,'0')}시 ${String(tNow.getMinutes()).padStart(2,'0')}분`;
+    document.getElementById('class-countdown').innerHTML = `<div style="font-weight:800; color:var(--primary-color);">${matchedStatus}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">(${timeClockStr} 실시간 동기화)</div>`;
+  };
+
+  setInterval(calculateCurrentClassStatus, 1000);
+  calculateCurrentClassStatus();
+}
+
+async function fetchNeisMealData() {
   const now = new Date();
   const getFormattedDate = (d) => d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
   const todayStr = getFormattedDate(now);
-
-  const day = now.getDay();
-  const diffToMon = now.getDate() - day + (day === 0 ? -6 : 1); 
-  const monDate = new Date(now.setDate(diffToMon));
-  const friDate = new Date(monDate); friDate.setDate(monDate.getDate() + 4);
-  
-  const fromStr = getFormattedDate(monDate); const toStr = getFormattedDate(friDate);
 
   try {
     const mealRes = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MLSV_YMD=${todayStr}`);
@@ -593,73 +658,6 @@ async function fetchNeisData() {
       document.getElementById('dinner-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
     }
   } catch(e) { console.error("급식 데이터 미러링 실패", e); }
-
-  try {
-    const timeRes = await fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&TI_FROM_YMD=${fromStr}&TI_TO_YMD=${toStr}&GRADE=1&CLASS_NM=4`);
-    const timeData = await timeRes.json();
-    
-    let schedule = Array.from({length: 7}, () => Array(5).fill('-')); 
-    
-    if (timeData.hisTimetable) {
-      timeData.hisTimetable[1].row.forEach(t => {
-        const period = parseInt(t.PERIO) - 1;
-        const dateObj = new Date(t.ALL_TI_YMD.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"));
-        const dayIdx = dateObj.getDay() - 1;
-        if(period >= 0 && period < 7 && dayIdx >= 0 && dayIdx < 5) { schedule[period][dayIdx] = t.ITRT_CNTNT.replace('-',''); }
-      });
-    }
-
-    const tbody = document.getElementById('timetable-body'); if(!tbody) return;
-    tbody.innerHTML = "";
-    schedule.forEach((row, pIdx) => {
-      let tr = document.createElement('tr');
-      tr.innerHTML = `<td style="background:#f8fafc; font-weight:700;">${pIdx + 1}교시</td>`;
-      row.forEach((subject, dIdx) => {
-        const isToday = (day - 1 === dIdx);
-        tr.innerHTML += `<td class="${isToday ? 'today' : ''}">${subject}</td>`;
-      });
-      tbody.appendChild(tr);
-    });
-
-    if(day >= 1 && day <= 5) {
-      const targetTh = document.getElementById(`th-${day}`);
-      if(targetTh) targetTh.classList.add('today');
-    }
-
-    const calculateCurrentClassStatus = () => {
-      const tNow = new Date();
-      const currentMinutes = tNow.getHours() * 60 + tNow.getMinutes();
-      
-      let matchedStatus = "방과 후 일과 종료 또는 주말";
-      
-      if (day >= 1 && day <= 5) {
-        for(let item of schoolTimeline) {
-          const startParts = item.start.split(":");
-          const endParts = item.end.split(":");
-          const startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-          const endMin = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-          
-          if(currentMinutes >= startMin && currentMinutes < endMin) {
-            if(item.title.includes("교시")) {
-              const periodIdx = parseInt(item.title.replace("교시","")) - 1;
-              const subjectName = (schedule[periodIdx] && schedule[periodIdx][day-1]) ? schedule[periodIdx][day-1] : "";
-              matchedStatus = `${item.title} [${subjectName || '수업'}] 진행 중`;
-            } else {
-              matchedStatus = `🍿 지금은 ${item.title}입니다!`;
-            }
-            break;
-          }
-        }
-      }
-      
-      const timeClockStr = `${String(tNow.getHours()).padStart(2,'0')}시 ${String(tNow.getMinutes()).padStart(2,'0')}분`;
-      document.getElementById('class-countdown').innerHTML = `<div style="font-weight:800; color:var(--primary-color);">${matchedStatus}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">(${timeClockStr} 실시간 동기화)</div>`;
-    };
-
-    setInterval(calculateCurrentClassStatus, 1000);
-    calculateCurrentClassStatus();
-
-  } catch(e) { console.error("시간표 나이스 API 바인딩 에러", e); }
 }
 </script>
 </body>
