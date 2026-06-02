@@ -13,142 +13,162 @@
 
 :root {
   --primary: #0A84FF; --bg-color: #f8f9fa; --box-bg: #ffffff;
-  --text-main: #111; --text-sub: #666; --border: #e2e8f0;
+  --text-main: #111; --text-sub: #666; --border: #cbd5e1;
   --nav-bg: #e0e7ff; --nav-text: #3730a3;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
-body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-/* 스케치 느낌의 도트 배경 */
+body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
+
+/* 스케치 감성의 세련된 도트 모눈종이 배경 테마 */
 body::before {
   content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px;
+  background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px); background-size: 24px 24px;
 }
 
-/* ---------------- Top Navigation ---------------- */
+/* ---------------- 상단 네비게이션 바 (아이콘 밀집화 및 최적화) ---------------- */
 .top-nav {
-  display: none; align-items: center; justify-content: space-between; padding: 15px 30px; 
-  background: var(--box-bg); border-bottom: 2px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  display: flex; align-items: center; justify-content: space-between; padding: 12px 25px; 
+  background: var(--box-bg); border-bottom: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.02); z-index: 10;
 }
-.nav-logo { font-size: 22px; font-weight: 900; color: var(--primary); display: flex; flex-direction: column; line-height: 1.1; }
-.nav-logo span { font-size: 12px; color: #111; }
-.nav-menu { display: flex; gap: 10px; align-items: center; }
+.nav-logo { font-size: 22px; font-weight: 900; color: var(--primary); display: flex; flex-direction: column; line-height: 1.05; cursor: pointer; user-select: none; }
+.nav-logo span { font-size: 11px; color: #111; font-weight: 700; }
+.nav-menu { display: flex; gap: 4px; align-items: center; } /* 간격을 조밀하게 조정 */
 .nav-item {
-  padding: 10px 18px; border-radius: 20px; font-weight: 700; font-size: 15px; color: var(--text-main);
-  cursor: pointer; transition: 0.2s; border: none; background: transparent;
+  padding: 8px 14px; border-radius: 15px; font-weight: 700; font-size: 14.5px; color: var(--text-main);
+  cursor: pointer; transition: 0.2s; border: none; background: transparent; display: flex; align-items: center; gap: 6px;
 }
 .nav-item:hover { background: #f1f5f9; }
 .nav-item.active { background: var(--nav-bg); color: var(--nav-text); }
-.nav-admin-btn { border: 2px solid #cbd5e1; padding: 8px 15px; border-radius: 8px; color: #64748B; font-weight: bold; cursor: pointer; background: #fff; margin-left: 20px; }
 
-/* ---------------- Main Container & Views ---------------- */
-.main-content { flex: 1; overflow-y: auto; padding: 30px; display: flex; justify-content: center; }
-.view-section { display: none; width: 100%; max-width: 1200px; animation: fadeIn 0.3s ease; }
+.nav-right-zone { display: flex; align-items: center; gap: 15px; }
+.user-top-status { font-size: 13.5px; font-weight: 700; color: var(--text-sub); display: none; align-items: center; gap: 8px; }
+.btn-top-msg { color: var(--primary); cursor: pointer; font-weight: 800; border-bottom: 1px solid var(--primary); }
+.btn-top-logout { color: #ff453a; cursor: pointer; font-weight: 800; }
+.nav-admin-btn { border: 2px solid var(--border); padding: 8px 14px; border-radius: 8px; color: #64748B; font-weight: bold; cursor: pointer; background: #fff; font-size: 13.5px; }
+.nav-admin-btn:hover { background: #f8fafc; }
+
+/* ---------------- 메인 컨테이너 ---------------- */
+.main-content { flex: 1; overflow-y: auto; padding: 25px; display: flex; justify-content: center; position: relative; }
+.view-section { display: none; width: 100%; max-width: 1200px; animation: fadeIn 0.2s ease; }
 .view-section.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-/* View: Login (IMG_1668) */
+/* 일체형 로그인 뷰 (내부 프레임 내 통일성 부여) */
+.login-frame-wrapper { display: flex; justify-content: center; align-items: center; min-height: 60vh; width: 100%; }
 .login-box {
-  background: var(--box-bg); padding: 50px; border-radius: 20px; border: 2px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; max-width: 400px; margin: 10vh auto;
+  background: var(--box-bg); padding: 45px; border-radius: 20px; border: 2.5px solid #111;
+  box-shadow: 8px 8px 0px #111; text-align: center; width: 100%; max-width: 400px;
 }
-.login-input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 2px solid var(--border); font-size: 16px; outline: none; }
+.login-input { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; border: 2px solid var(--border); font-size: 15.5px; outline: none; font-weight: 600; }
 .login-input:focus { border-color: var(--primary); }
-.btn-primary { width: 100%; padding: 16px; background: var(--primary); color: #fff; font-weight: 800; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; }
+.btn-primary { width: 100%; padding: 15px; background: var(--primary); color: #fff; font-weight: 800; font-size: 15.5px; border: 2px solid #111; border-radius: 10px; cursor: pointer; box-shadow: 3px 3px 0 #111; }
+.btn-primary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #111; }
 
-/* View: Home (IMG_1667) */
-.notice-banner { background: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 15px 20px; border-radius: 12px; font-weight: bold; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; cursor: pointer;}
-.home-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
-.panel { background: var(--box-bg); border: 2px solid var(--border); border-radius: 20px; padding: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); }
-.status-big-box { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 300px;}
-.status-val { font-size: 60px; font-weight: 900; margin: 20px 0; color: var(--primary); }
-.status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-top: 20px;}
-.status-btn { padding: 15px; border-radius: 12px; border: 2px solid var(--border); background: #f8fafc; font-weight: bold; cursor: pointer; transition: 0.2s;}
-.status-btn:hover { border-color: var(--primary); background: #eff6ff; }
-.profile-info { text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid var(--border); }
-.util-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.util-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border-radius: 16px; border: 2px solid var(--border); background: #fff; font-weight: bold; cursor: pointer; transition: 0.2s;}
-.util-btn i { font-size: 24px; color: var(--primary); }
-.util-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+/* 홈 대시보드 구조 (IMG_1667 완벽 복각) */
+.notice-banner { background: #dbeafe; border: 2px solid var(--primary); color: #1e40af; padding: 12px 20px; border-radius: 12px; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 3px 3px 0 rgba(10,132,255,0.2); }
+.home-grid { display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
+.panel { background: var(--box-bg); border: 2.5px solid #111; border-radius: 20px; padding: 25px; box-shadow: 5px 5px 0px rgba(0,0,0,0.05); }
+.status-big-box { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 240px; border: 2px dashed var(--border); border-radius: 14px; margin-bottom: 20px; background: #fafafa; }
+.status-val { font-size: 55px; font-weight: 900; margin: 10px 0; color: var(--primary); letter-spacing: -1px; }
+.status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.status-btn { padding: 12px; border-radius: 10px; border: 2px solid var(--border); background: #f8fafc; font-weight: bold; cursor: pointer; transition: 0.15s; font-size: 14px; }
+.status-btn:hover { border-color: #111; background: var(--nav-bg); color: var(--nav-text); }
 
-/* View: Timetable & Meals (IMG_1672) */
-.time-meal-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
-.timetable-table { width: 100%; border-collapse: collapse; text-align: center; }
-.timetable-table th, .timetable-table td { border: 2px solid var(--border); padding: 15px 10px; font-weight: bold; }
-.timetable-table th { background: #f1f5f9; }
-.timetable-table td.today { background: #e0e7ff; color: #3730a3; border-color: #a5b4fc;}
-.current-class-box { border: 3px solid var(--text-main); border-radius: 16px; padding: 25px; text-align: center; margin-bottom: 20px; font-weight: 900; }
-.meal-box { border: 2px solid var(--border); border-radius: 16px; padding: 20px; height: 100%; }
-.meal-box h4 { border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; }
+/* 홈 우측 스케치 위젯 영역 */
+.right-profile-box { text-align: center; padding: 20px; border: 2.5px solid #111; border-radius: 16px; margin-bottom: 20px; background: #fff; }
+.util-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.util-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; border-radius: 12px; border: 2px solid var(--border); background: #fff; font-weight: bold; cursor: pointer; font-size: 13.5px; text-decoration: none; color: inherit; }
+.util-btn i { font-size: 22px; color: var(--primary); }
+.util-btn:hover { border-color: #111; background: #f8fafc; }
 
-/* View: Chat (IMG_1669) */
-.chat-container { display: flex; flex-direction: column; height: calc(100vh - 150px); border: 2px solid var(--border); border-radius: 20px; background: #fff; overflow: hidden;}
-.chat-logs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 15px; background: #f8fafc;}
-.chat-bubble { max-width: 70%; padding: 12px 18px; border-radius: 16px; background: #e2e8f0; align-self: flex-start; font-weight: 500;}
-.chat-bubble.admin { background: #dbeafe; border-left: 4px solid var(--primary); }
-.chat-input-area { display: flex; padding: 20px; background: #fff; border-top: 2px solid var(--border); gap: 10px;}
-.chat-input { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid var(--border); font-size: 16px; outline: none; }
+/* 시간표/급식표 (IMG_1672 완벽 동적구현) */
+.time-meal-grid { display: grid; grid-template-columns: 1fr 360px; gap: 25px; }
+.timetable-table { width: 100%; border-collapse: collapse; text-align: center; background: #fff; }
+.timetable-table th, .timetable-table td { border: 2px solid var(--border); padding: 14px 8px; font-weight: bold; font-size: 14.5px; }
+.timetable-table th { background: #f1f5f9; border-bottom: 2.5px solid #111; }
+/* 오늘 일자 하이라이트 스타일 */
+.timetable-table td.highlight-day, .timetable-table th.highlight-day { background: #fff3cd; color: #856404; border-left: 2.5px solid #ffc107; border-right: 2.5px solid #ffc107; }
+.current-class-box { border: 2.5px solid #111; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px; font-weight: 900; background: #fff; box-shadow: 4px 4px 0 #111; }
+.meal-wrap { display: flex; flex-direction: column; gap: 15px; }
+.meal-box { border: 2px solid var(--border); border-radius: 12px; padding: 15px; background: #fff; }
+.meal-box h4 { border-bottom: 2px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; font-size: 15.5px; display: flex; align-items: center; gap: 6px; }
 
-/* View: Games (IMG_1671) */
-.game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; height: 60vh; }
-.game-card { border: 3px solid var(--text-main); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 28px; font-weight: 900; cursor: pointer; transition: 0.3s; background: #fff; text-decoration: none; color: inherit;}
-.game-card i { font-size: 80px; margin-bottom: 20px; }
-.game-card:hover { transform: scale(1.03); box-shadow: 10px 10px 0 #111; }
+/* 실시간 한마디 (IMG_1669) */
+.chat-container { display: flex; flex-direction: column; height: calc(100vh - 160px); border: 2.5px solid #111; border-radius: 20px; background: #fff; overflow: hidden; box-shadow: 5px 5px 0 #111; }
+.chat-logs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 12px; background: #f8fafc; }
+.chat-bubble { max-width: 75%; padding: 12px 16px; border-radius: 14px; background: #e2e8f0; align-self: flex-start; font-weight: 600; font-size: 14.5px; border: 1.5px solid var(--border); }
+.chat-bubble.admin { background: #e0e7ff; border: 2px solid var(--primary); color: var(--nav-text); }
+.chat-input-area { display: flex; padding: 15px; background: #fff; border-top: 2px solid var(--border); gap: 10px; align-items: center; }
 
-/* View: Notices (IMG_1670) */
+/* 104 게임존 (IMG_1671) */
+.game-flex-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; height: 55vh; margin-top: 10px; }
+.game-card { border: 3px solid #111; border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 24px; font-weight: 900; cursor: pointer; transition: 0.2s; background: #fff; text-decoration: none; color: inherit; box-shadow: 6px 6px 0 #111; }
+.game-card i { font-size: 70px; margin-bottom: 15px; color: var(--primary); }
+.game-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 #111; }
+
+/* 공지사항 (IMG_1670 - 정밀 카운트다운 전환) */
 .notice-layout { display: flex; flex-direction: column; gap: 20px; }
-.dday-card { border: 2px solid var(--border); border-radius: 16px; padding: 25px; display: flex; justify-content: space-between; align-items: center; background: #fff; font-size: 24px; font-weight: 900;}
-.dday-badge { background: var(--text-main); color: #fff; padding: 10px 20px; border-radius: 12px; font-size: 32px; }
+.countdown-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 15px; }
+.dday-card { border: 2.5px solid #111; border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #fff; font-size: 18px; font-weight: 800; box-shadow: 4px 4px 0 rgba(0,0,0,0.05); }
+.dday-badge { background: #ff453a; color: #fff; padding: 8px 14px; border-radius: 10px; font-size: 20px; font-variant-numeric: tabular-nums; border: 1.5px solid #111; }
 
-/* Modals */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+/* 모달 시스템 오픈 인프라 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
 .modal-overlay.active { display: flex; }
-.modal-content { background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
+.modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 2.5px solid #111; box-shadow: 6px 6px 0 #111; }
 
-/* Game View Overlay */
+/* 임베디드 웹 게임 인터페이스 구동기 */
 #game-iframe-container { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: #111; z-index: 2000; flex-direction: column; }
-.game-top-bar { padding: 15px 30px; background: #222; display: flex; justify-content: space-between; align-items: center; color: #fff;}
-.btn-exit-game { background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;}
+.game-top-bar { padding: 12px 25px; background: #222; display: flex; justify-content: space-between; align-items: center; color: #fff; border-bottom: 2px solid #333; }
 </style>
 </head>
 <body>
 
-<nav class="top-nav" id="top-nav">
-  <div class="nav-logo">Class 104<span>WebSchool</span></div>
+<nav class="top-nav">
+  <div class="nav-logo" onclick="goToHome()">Class104<span>WebSchool</span></div>
   <div class="nav-menu">
     <button class="nav-item" onclick="openModal('mobile-id-modal')"><i class="fa-solid fa-id-badge"></i> 모바일학생증</button>
     <button class="nav-item" onclick="switchTab('timetable')">시간표/급식표</button>
     <button class="nav-item" onclick="switchTab('chat')">실시간한마디</button>
     <button class="nav-item" onclick="switchTab('games')">104게임존</button>
     <button class="nav-item" onclick="switchTab('notices')">공지사항</button>
-    <button class="nav-admin-btn" onclick="location.href='admin.html'"><i class="fa-solid fa-lock"></i> 관리자로그인</button>
+  </div>
+  <div class="nav-right-zone">
+    <div class="user-top-status" id="user-top-status">
+      <span>환영합니다 <b id="top-username" style="color:#111;">사용자</b> 님</span> | 
+      <span class="btn-top-msg" onclick="openInquiryModal()">1:1 쪽지 확인</span> | 
+      <span class="btn-top-logout" onclick="doLogout()">로그아웃</span>
+    </div>
+    <button class="nav-admin-btn" onclick="location.href='admin.html'"><i class="fa-solid fa-lock"></i> 관리자</button>
   </div>
 </nav>
 
 <main class="main-content">
   
   <section class="view-section active" id="view-login">
-    <div class="login-box">
-      <h2 style="font-size: 28px; margin-bottom: 10px;">로그인 후 사용가능합니다</h2>
-      <p style="color:var(--text-sub); margin-bottom: 30px;">Class 104 통합 시스템</p>
-      <input type="text" id="login-id" class="login-input" placeholder="이름 (예: 홍길동)">
-      <input type="password" id="login-pw" class="login-input" placeholder="비밀번호" onkeydown="if(event.keyCode==13) doLogin()">
-      <button class="btn-primary" onclick="doLogin()">LOGIN</button>
+    <div class="login-frame-wrapper">
+      <div class="login-box">
+        <h2 style="font-size: 24px; margin-bottom: 8px; font-weight:900;">로그인 후 사용가능합니다</h2>
+        <p style="color:var(--text-sub); font-size:14px; margin-bottom: 25px; font-weight:600;">선덕고등학교 1학년 4반 통합 허브</p>
+        <input type="text" id="login-id" class="login-input" placeholder="이름 입력 (예: 김시량)">
+        <input type="password" id="login-pw" class="login-input" placeholder="비밀번호">
+        <button class="btn-primary" onclick="doLogin()">LOGIN</button>
+      </div>
     </div>
   </section>
 
   <section class="view-section" id="view-home">
     <div class="notice-banner" id="top-banner" onclick="switchTab('notices')" style="display: none;">
-      <i class="fa-solid fa-flag" style="color: #ef4444;"></i> <span id="banner-text">공지사항 텍스트</span>
+      <i class="fa-solid fa-flag" style="color: #ff453a;"></i> <span id="banner-text">공지사항 실시간 로드 중...</span>
     </div>
     
     <div class="home-grid">
       <div class="panel">
-        <h2 style="margin-bottom: 20px; text-align: center;">현재 내 상태</h2>
+        <h3 style="margin-bottom: 15px; font-size:18px; font-weight:900;"><i class="fa-solid fa-circle-check" style="color:var(--primary)"></i> 현재 내 상태</h3>
         <div class="status-big-box">
-          <div style="font-size: 20px; color: var(--text-sub);"><i class="fa-solid fa-location-dot"></i> 현재 상태</div>
           <div class="status-val" id="my-current-status">출석</div>
-          <div style="font-size: 16px; color: #888;" id="my-seat-info">내 자리: 정보없음</div>
+          <div style="font-size: 15px; color: var(--text-sub); font-weight:700;" id="my-seat-info">🪑 내 자리: 로딩 중</div>
         </div>
         <div class="status-grid">
           <button class="status-btn" onclick="changeStatus('출석')">출석</button>
@@ -156,27 +176,24 @@ body::before {
           <button class="status-btn" onclick="changeStatus('조퇴')">조퇴</button>
           <button class="status-btn" onclick="changeStatus('1-4 교실자습')">교실자습</button>
           <button class="status-btn" onclick="changeStatus('심화반 이동자습')">심화반</button>
-          <button class="status-btn" onclick="changeStatus('기타')">기타</button>
+          <button class="status-btn" onclick="changeStatus('기타')">기타 사유</button>
         </div>
       </div>
       
-      <div>
-        <div class="panel profile-info">
-          <div style="font-size: 40px; margin-bottom: 10px; color: var(--primary);"><i class="fa-solid fa-circle-user"></i></div>
-          <h3 style="font-size: 20px; margin-bottom: 5px;">환영합니다 <span id="user-name-display"></span> 님</h3>
-          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
-            <button onclick="switchTab('chat')" style="border:none; background:none; color:var(--primary); font-weight:bold; cursor:pointer;">새 메시지 확인</button>
-            <button onclick="doLogout()" style="border:none; background:none; color:#ef4444; font-weight:bold; cursor:pointer;">로그아웃</button>
-          </div>
+      <div style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="right-profile-box">
+          <div style="font-size: 45px; margin-bottom: 8px; color: var(--primary);"><i class="fa-solid fa-smile-wink"></i></div>
+          <h3 style="font-size: 19px; font-weight:900; margin-bottom: 5px;"><span id="user-name-display">사용자</span> 님</h3>
+          <p style="font-size:13px; color:var(--text-sub); font-weight:600;">선덕고등학교 1학년 4반 학급원</p>
         </div>
         
         <div class="util-grid">
-          <button class="util-btn" onclick="window.open('https://sunduck.riroschool.kr', '_blank')"><i class="fa-solid fa-backpack"></i> 리로스쿨</button>
-          <button class="util-btn" onclick="window.open('https://sunduck.sen.hs.kr', '_blank')"><i class="fa-solid fa-school"></i> 학교홈피</button>
-          <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-music"></i> 신청곡전송</button>
-          <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-lock"></i> 비번변경</button>
-          <button class="util-btn" style="grid-column: span 2; flex-direction: row; justify-content: center;" onclick="window.open('dashboard.html', '_blank')">
-            <i class="fa-solid fa-desktop"></i> 전광판 모니터링
+          <button class="util-btn" onclick="window.open('https://sunduck.riroschool.kr', '_blank')"><i class="fa-solid fa-school-flag"></i> 리로스쿨 바로가기</button>
+          <button class="util-btn" onclick="window.open('https://sunduck.sen.hs.kr', '_blank')"><i class="fa-solid fa-house-chimney"></i> 학교홈피</button>
+          <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-compact-disc"></i> 신청곡 신청</button>
+          <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-key"></i> 비밀번호 변경</button>
+          <button class="util-btn" style="grid-column: span 2; background: #fafafa; border-style: dashed;" onclick="window.open('dashboard.html', '_blank')">
+            <i class="fa-solid fa-tv"></i> 종합 실시간 전광판 띄우기
           </button>
         </div>
       </div>
@@ -186,8 +203,8 @@ body::before {
   <section class="view-section" id="view-timetable">
     <div class="time-meal-grid">
       <div class="panel">
-        <h2 style="margin-bottom: 20px;">이번 주 전체 시간표</h2>
-        <table class="timetable-table" id="timetable-matrix">
+        <h3 style="margin-bottom: 15px; font-size:18px; font-weight:900;">선덕고등학교 1학년 4반 전체 시간표</h3>
+        <table class="timetable-table">
           <thead>
             <tr><th>교시</th><th id="th-1">월</th><th id="th-2">화</th><th id="th-3">수</th><th id="th-4">목</th><th id="th-5">금</th></tr>
           </thead>
@@ -196,108 +213,116 @@ body::before {
         </table>
       </div>
       
-      <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="meal-wrap">
         <div class="current-class-box">
-          <div style="font-size: 18px; color: var(--text-sub); margin-bottom: 10px;">현재 수업 상태</div>
-          <div id="class-countdown" style="font-size: 32px; color: var(--primary);">0교시 00분 남음</div>
+          <div style="font-size: 14.5px; color: var(--text-sub); margin-bottom: 6px;">현재 시간 표준 상태</div>
+          <div id="class-countdown" style="font-size: 24px; color: var(--primary); letter-spacing: -0.5px;">실시간 트래킹 중</div>
         </div>
         <div class="panel meal-box">
-          <h4><i class="fa-solid fa-bowl-food" style="color: #f59e0b;"></i> 오늘 중식</h4>
-          <div id="lunch-menu" style="line-height: 1.6; font-size: 15px; color: var(--text-sub);">불러오는 중...</div>
+          <h4><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> 오늘의 중식 (선덕고)</h4>
+          <div id="lunch-menu" style="line-height: 1.6; font-size: 14px; color: var(--text-sub); font-weight:600;">불러오는 중...</div>
         </div>
         <div class="panel meal-box">
-          <h4><i class="fa-solid fa-utensils" style="color: #10b981;"></i> 오늘 석식</h4>
-          <div id="dinner-menu" style="line-height: 1.6; font-size: 15px; color: var(--text-sub);">불러오는 중...</div>
+          <h4><i class="fa-solid fa-moon" style="color: #10b981;"></i> 오늘의 석식 (선덕고)</h4>
+          <div id="dinner-menu" style="line-height: 1.6; font-size: 14px; color: var(--text-sub); font-weight:600;">불러오는 중...</div>
         </div>
       </div>
     </div>
   </section>
 
   <section class="view-section" id="view-chat">
-    <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-message" style="color:var(--primary);"></i> 실시간 한마디</h2>
     <div class="chat-container">
       <div class="chat-logs" id="chat-list"></div>
       <div class="chat-input-area">
-        <input type="text" id="chat-nick" class="login-input" style="width: 100px; margin:0;" placeholder="닉네임">
-        <input type="text" id="chat-msg" class="login-input" style="flex:1; margin:0;" placeholder="메시지를 입력하세요..." onkeydown="if(event.keyCode==13) sendChat()">
-        <button class="btn-primary" style="width: auto; padding: 0 25px;" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i> 전송</button>
+        <input type="text" id="chat-nick" class="login-input" style="width: 110px; margin:0;" placeholder="익명 닉네임">
+        <input type="text" id="chat-msg" class="login-input" style="flex:1; margin:0;" placeholder="내용을 입력하고 Enter를 누르세요..." onkeydown="if(event.keyCode==13) sendChat()">
+        <button class="btn-primary" style="width: auto; padding: 0 25px; box-shadow:none;" onclick="sendChat()">보내기</button>
       </div>
     </div>
   </section>
 
   <section class="view-section" id="view-games">
-    <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-gamepad" style="color:var(--primary);"></i> 104 미니게임존</h2>
-    <div class="game-grid">
-      <div class="game-card" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '테트리스')" style="border-color: #00bcd4; color: #00bcd4;">
-        <i class="fa-solid fa-shapes"></i><span>테트리스</span>
+    <div class="game-flex-grid">
+      <div class="game-card" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '테트리스')">
+        <i class="fa-solid fa-cubes-stacked"></i><span>테트리스</span>
       </div>
-      <div class="game-card" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '블록블라스트')" style="border-color: #e91e63; color: #e91e63;">
-        <i class="fa-solid fa-cubes"></i><span>블록블라스트</span>
+      <div class="game-card" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '블록블라스트')">
+        <i class="fa-solid fa-puzzle-piece"></i><span>블록블라스트</span>
       </div>
-      <div class="game-card" onclick="openGame('https://wayou.github.io/t-rex-runner/', 'T-Rex')" style="border-color: #4caf50; color: #4caf50;">
-        <i class="fa-solid fa-dragon"></i><span>T-Rex</span>
+      <div class="game-card" onclick="openGame('https://wayou.github.io/t-rex-runner/', 'T-Rex Game')">
+        <i class="fa-solid fa-bolt-lightning"></i><span>T-Rex</span>
       </div>
     </div>
   </section>
 
   <section class="view-section" id="view-notices">
-    <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> 학급 공지사항 및 일정</h2>
-    <div class="notice-layout">
-      <div id="dday-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;"></div>
-      
-      <div class="panel">
-        <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 10px;">전체 공지 내역</h3>
-        <div id="full-notice-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
-      </div>
+    <h3 style="margin-bottom: 15px; font-size:18px; font-weight:900;"><i class="fa-solid fa-hourglass-half"></i> 실시간 카운트다운 일정 (우리 반 D-Day)</h3>
+    <div id="dday-container" class="countdown-grid" style="margin-bottom: 25px;"></div>
+    
+    <div class="panel">
+      <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 10px; font-size:16.5px; font-weight:900;">학급 공지 히스토리</h3>
+      <div id="full-notice-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
   </section>
 </main>
 
-<div class="modal-overlay" id="mobile-id-modal">
+<div class="modal-overlay" id="mobile-id-modal" onclick="if(event.target==this) closeModal('mobile-id-modal')">
   <div class="modal-content" style="max-width: 320px;">
-    <h3 style="margin-bottom: 20px;">선덕고등학교 모바일학생증</h3>
-    <div style="width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 50px; color: #94a3b8;"><i class="fa-solid fa-user"></i></div>
-    <h2 id="id-name" style="margin-bottom: 5px;">이름</h2>
-    <p id="id-number" style="color: var(--text-sub); margin-bottom: 20px; letter-spacing: 2px;">10400</p>
-    <svg id="barcode-canvas" style="width:100%; height:80px; margin-bottom: 20px;"></svg>
-    <button class="btn-primary" onclick="closeModal('mobile-id-modal')">닫기</button>
+    <h4 style="margin-bottom: 15px; font-size:15px;"><i class="fa-solid fa-graduation-cap"></i> 선덕고등학교 모바일학생증</h4>
+    <div style="width: 90px; height: 90px; border-radius: 50%; background: #f1f5f9; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 45px; color: #cbd5e1; border: 2px solid #111;"><i class="fa-solid fa-user"></i></div>
+    <h2 id="id-name" style="margin-bottom: 4px; font-weight:900;">이름</h2>
+    <p id="id-number" style="color: var(--text-sub); margin-bottom: 20px; font-weight:800; letter-spacing: 2px;">10400</p>
+    <div style="background:#fff; padding:10px; border-radius:10px; border:2px solid #111;"><svg id="barcode-canvas" style="width:100%; height:70px;"></svg></div>
+    <button class="btn-primary" style="margin-top:20px; padding:10px;" onclick="closeModal('mobile-id-modal')">확인 완료</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="song-modal">
+<div class="modal-overlay" id="inquiry-modal" onclick="if(event.target==this) closeModal('inquiry-modal')">
   <div class="modal-content">
-    <h3 style="margin-bottom: 20px;">쉬는시간 신청곡</h3>
-    <input type="text" id="song-title" class="login-input" placeholder="곡 제목">
-    <input type="text" id="song-artist" class="login-input" placeholder="가수 이름">
+    <h3 style="margin-bottom: 12px; font-weight:900; color:var(--primary);"><i class="fa-solid fa-paper-plane"></i> 관리자 1:1 쪽지함</h3>
+    <p style="font-size:12.5px; color:var(--text-sub); margin-bottom:15px; font-weight:600;">작성한 메시지는 선생님(ERP 관리자) 페이지로 실시간 전송됩니다.</p>
+    <textarea id="inquiry-text" class="login-input" style="height:120px; resize:none; font-family:inherit; padding:12px;" placeholder="선생님께 드릴 말씀이나 문의 사항을 입력하세요..."></textarea>
     <div style="display: flex; gap: 10px;">
-      <button class="btn-primary" style="background: var(--border); color: #111;" onclick="closeModal('song-modal')">취소</button>
-      <button class="btn-primary" onclick="submitSong()">신청하기</button>
+      <button class="btn-primary" style="background: #e2e8f0; color: #111; box-shadow:none;" onclick="closeModal('inquiry-modal')">닫기</button>
+      <button class="btn-primary" onclick="submitInquiry()">쪽지 보내기</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="pw-modal">
+<div class="modal-overlay" id="song-modal" onclick="if(event.target==this) closeModal('song-modal')">
   <div class="modal-content">
-    <h3 style="margin-bottom: 20px;">비밀번호 변경</h3>
-    <input type="password" id="new-pw" class="login-input" placeholder="새 비밀번호 입력">
-    <div style="display: flex; gap: 10px;">
-      <button class="btn-primary" style="background: var(--border); color: #111;" onclick="closeModal('pw-modal')">취소</button>
-      <button class="btn-primary" onclick="changePw()">변경하기</button>
+    <h3 style="margin-bottom: 15px; font-weight:900;">🎵 쉬는시간 신청곡 접수</h3>
+    <input type="text" id="song-title" class="login-input" placeholder="곡 제목 입력">
+    <input type="text" id="song-artist" class="login-input" placeholder="가수명 입력">
+    <div style="display: flex; gap: 10px; margin-top:5px;">
+      <button class="btn-primary" style="background: #e2e8f0; color: #111; box-shadow:none;" onclick="closeModal('song-modal')">취소</button>
+      <button class="btn-primary" onclick="submitSong()">곡 신청</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pw-modal" onclick="if(event.target==this) closeModal('pw-modal')">
+  <div class="modal-content">
+    <h3 style="margin-bottom: 15px; font-weight:900;">🔐 비밀번호 변경</h3>
+    <input type="password" id="new-pw" class="login-input" placeholder="변경할 비밀번호 입력">
+    <div style="display: flex; gap: 10px; margin-top:5px;">
+      <button class="btn-primary" style="background: #e2e8f0; color: #111; box-shadow:none;" onclick="closeModal('pw-modal')">취소</button>
+      <button class="btn-primary" onclick="changePw()">변경 확정</button>
     </div>
   </div>
 </div>
 
 <div id="game-iframe-container">
   <div class="game-top-bar">
-    <h3 id="game-title-bar">게임</h3>
-    <button class="btn-exit-game" onclick="closeGame()">나가기</button>
+    <h3 id="game-title-bar" style="font-weight:900;">게임존 가동 중</h3>
+    <button class="btn-exit-game" onclick="closeGame()">게임 종료 (대시보드 복귀)</button>
   </div>
   <iframe id="game-frame" src="" style="width: 100%; flex: 1; border: none; background: #fff;"></iframe>
 </div>
 
 <script>
 /* =========================================================
-   1. Firebase 초기화 및 전역 변수
+   1. 데이터 베이스 라우팅 프로토콜 정보 수립
 ========================================================= */
 const firebaseConfig = { apiKey: "AlzaSyBsYbl11XCtPyUkby8GzEJHlxw_T28WNrg", authDomain: "class4-board-f6054.firebaseapp.com", databaseURL: "https://class4-board-f6054-default-rtdb.firebaseio.com/", projectId: "class4-board-f6054" };
 firebase.initializeApp(firebaseConfig);
@@ -310,22 +335,23 @@ const studentMap = {};
 fullRosterRaw.forEach(s => { studentMap[s.name] = { num: s.num, defaultPw: "104" + s.num, fullName: s.num + " " + s.name }; });
 
 let loggedInUser = null;
+let ddayTimers = [];
 
 /* =========================================================
-   2. UI 및 인증 컨트롤
+   2. 세션 통합 관리 및 홈 라우팅 인터페이스
 ========================================================= */
 window.onload = () => {
   const savedUser = localStorage.getItem('savedStudentName');
   if (savedUser && studentMap[savedUser]) {
     loggedInUser = savedUser;
-    initApp();
+    activateStudentSession();
   }
 };
 
 function doLogin() {
-  const name = document.getElementById('login-id').value.trim();
-  const pw = document.getElementById('login-pw').value.trim();
-  if (!name || !studentMap[name]) { alert("등록되지 않은 이름입니다."); return; }
+  const name = document.getElementById('login-id').value.replace(/\s/g, "");
+  const pw = document.getElementById('login-pw').value.replace(/\s/g, "");
+  if (!name || !studentMap[name]) { alert("등록된 학생 이름이 아닙니다."); return; }
 
   db.ref('auth/students/' + name).once('value').then(snap => {
     const customPw = snap.val();
@@ -333,73 +359,68 @@ function doLogin() {
     if (pw === validPw) {
       localStorage.setItem('savedStudentName', name);
       loggedInUser = name;
-      initApp();
-    } else {
-      alert("비밀번호가 일치하지 않습니다.");
-    }
+      activateStudentSession();
+    } else { alert("비밀번호가 틀렸습니다."); }
   });
 }
 
 function doLogout() {
-  if(confirm("로그아웃 하시겠습니까?")) {
+  if(confirm("안전하게 로그아웃하시겠습니까?")) {
     localStorage.removeItem('savedStudentName');
     location.reload();
   }
 }
 
-function initApp() {
-  document.getElementById('top-nav').style.display = 'flex';
+// 로고 클릭 시 강제 홈 화면(대시보드)으로 리디렉션 처리
+function goToHome() {
+  if (loggedInUser) switchTab('home');
+}
+
+function activateStudentSession() {
+  document.getElementById('view-login').classList.remove('active');
+  document.getElementById('user-top-status').style.display = 'flex';
+  document.getElementById('top-username').innerText = loggedInUser;
   document.getElementById('user-name-display').innerText = loggedInUser;
+  
   switchTab('home');
   
-  // 리스너 등록
-  trackStatus();
-  trackChat();
-  trackNotices();
-  
-  // 모바일학생증 바코드 세팅
-  const studentNum = "104" + studentMap[loggedInUser].num;
-  document.getElementById('id-name').innerText = loggedInUser;
-  document.getElementById('id-number').innerText = studentNum;
-  db.ref('studentBarcodes/' + loggedInUser).once('value').then(snap => {
-    const code = snap.val() || (studentNum + "0000");
-    JsBarcode("#barcode-canvas", code, { format: "CODE128", displayValue: true, width: 2, height: 50 });
-  });
-
-  // 나이스 API 호출 (시간표/급식)
-  fetchNeisData();
+  // 데이터 동기화 커넥션 바인딩
+  trackLiveStatus();
+  trackLiveChat();
+  trackLiveNotices();
+  fetchSunduckNeisData();
 }
 
 function switchTab(tabId) {
+  if (!loggedInUser) return;
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   
   document.getElementById(`view-${tabId}`).classList.add('active');
-  const navBtns = document.querySelectorAll('.nav-item');
-  if(tabId === 'home') navBtns.forEach(btn=>btn.classList.remove('active'));
-  else {
-    Array.from(navBtns).find(btn => btn.innerText.includes(
-      tabId==='timetable' ? '시간표' : tabId==='chat' ? '실시간' : tabId==='games' ? '게임' : '공지'
-    ))?.classList.add('active');
+  
+  if(tabId !== 'home') {
+    const targetKeyword = tabId === 'timetable' ? '시간표' : tabId === 'chat' ? '한마디' : tabId === 'games' ? '게임존' : '공지사항';
+    Array.from(document.querySelectorAll('.nav-item')).find(btn => btn.innerText.includes(targetKeyword))?.classList.add('active');
   }
 }
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function openInquiryModal() { openModal('inquiry-modal'); }
 
 /* =========================================================
-   3. 기능 로직 (출석, 채팅, 공지, 기타)
+   3. 데이터 파싱 커넥터 (상태제어, 1:1 메시지, 정밀 디데이)
 ========================================================= */
 function changeStatus(stat) {
   if (stat === '기타') {
-    stat = prompt("사유를 입력하세요:");
+    stat = prompt("구체적인 사유를 작성하세요:");
     if (!stat) return;
   }
   const fullName = studentMap[loggedInUser].fullName;
-  db.ref('studentStates/' + fullName).set(stat).then(() => alert("상태가 업데이트 되었습니다."));
+  db.ref('studentStates/' + fullName).set(stat).then(() => alert("출석 상태가 저장되었습니다."));
 }
 
-function trackStatus() {
+function trackLiveStatus() {
   const fullName = studentMap[loggedInUser].fullName;
   db.ref('studentStates/' + fullName).on('value', snap => {
     document.getElementById('my-current-status').innerText = snap.val() || "출석";
@@ -408,7 +429,7 @@ function trackStatus() {
     const seats = snap.val() || {};
     let mySeat = "지정되지 않음";
     for(let pos in seats) { if(seats[pos] === loggedInUser) { mySeat = pos; break; } }
-    document.getElementById('my-seat-info').innerText = `내 자리: ${mySeat}`;
+    document.getElementById('my-seat-info').innerText = `🪑 내 자리: ${mySeat}`;
   });
 }
 
@@ -421,60 +442,111 @@ function sendChat() {
   });
 }
 
-function trackChat() {
-  db.ref('messages').limitToLast(30).on('value', snap => {
-    const list = document.getElementById('chat-list');
-    list.innerHTML = "";
+function trackLiveChat() {
+  db.ref('messages').limitToLast(40).on('value', snap => {
+    const container = document.getElementById('chat-list');
+    container.innerHTML = "";
     snap.forEach(child => {
       const d = child.val();
       const div = document.createElement('div');
       div.className = "chat-bubble" + (d.badge || d.realName === "시스템 관리자" ? " admin" : "");
-      div.innerHTML = `<div style="font-size:12px; color:#888; font-weight:bold; margin-bottom:4px;">${d.nickname}</div>${d.message}`;
-      list.appendChild(div);
+      div.innerHTML = `<div style="font-size:11.5px; color:#666; font-weight:bold; margin-bottom:3px;">${d.nickname}</div>${d.message}`;
+      container.appendChild(div);
     });
   });
 }
 
-function trackNotices() {
-  // 상단 띠배너 공지
+function trackLiveNotices() {
   db.ref('config/studentNotice').on('value', snap => {
     const txt = snap.val();
     if(txt) { document.getElementById('top-banner').style.display = 'flex'; document.getElementById('banner-text').innerText = txt; }
     else document.getElementById('top-banner').style.display = 'none';
   });
   
-  // 공지 목록 및 디데이
-  db.ref('classNotices').limitToLast(10).on('value', snap => {
-    const list = document.getElementById('full-notice-list');
-    list.innerHTML = "";
+  db.ref('classNotices').limitToLast(15).on('value', snap => {
+    const container = document.getElementById('full-notice-list');
+    container.innerHTML = "";
     let arr = []; snap.forEach(c => arr.push(c.val()));
     arr.reverse().forEach(d => {
-      list.innerHTML += `<div style="padding:15px; border:2px solid var(--border); border-radius:12px;"><div style="font-size:12px; color:var(--primary); font-weight:bold;">${d.author}</div>${d.text}</div>`;
+      container.innerHTML += `<div style="padding:14px; border:2px solid var(--border); border-radius:12px; background:#fafafa;"><div style="font-size:12px; color:var(--primary); font-weight:bold; margin-bottom:4px;">작성: ${d.author}</div>${d.text}</div>`;
     });
   });
+
+  // 정밀 카운트다운 가동엔진 탑재
   db.ref('dDays').on('value', snap => {
-    const list = document.getElementById('dday-container');
-    list.innerHTML = "";
-    snap.forEach(c => {
-      const d = c.val();
-      list.innerHTML += `<div class="dday-card"><span>${d.title}</span><span class="dday-badge">${d.date}</span></div>`;
+    ddayTimers.forEach(t => clearInterval(t));
+    ddayTimers = [];
+    const container = document.getElementById('dday-container');
+    container.innerHTML = "";
+    
+    if(!snap.exists()) { container.innerHTML = "<p style='color:#888; font-weight:600;'>등록된 고정 D-Day 일정이 없습니다.</p>"; return; }
+
+    snap.forEach(child => {
+      const d = child.val();
+      const cardId = "dday-" + child.key;
+      
+      container.innerHTML += `
+        <div class="dday-card">
+          <span>🎯 ${d.title}</span>
+          <span class="dday-badge" id="${cardId}">计算중</span>
+        </div>
+      `;
+
+      const startCountdownEngine = () => {
+        const targetDate = new Date(d.date + "T00:00:00").getTime();
+        const interval = setInterval(() => {
+          const now = Date.now();
+          const diff = targetDate - now;
+          const el = document.getElementById(cardId);
+          if(!el) { clearInterval(interval); return; }
+
+          if (diff <= 0) {
+            el.innerText = "D-DAY";
+            el.style.background = "#30d158";
+          } else {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            el.innerText = `D-${days}일 ${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+          }
+        }, 1000);
+        ddayTimers.push(interval);
+      };
+      setTimeout(startCountdownEngine, 50);
     });
   });
 }
 
+function submitInquiry() {
+  const txt = document.getElementById('inquiry-text').value.trim();
+  if(!txt) return;
+  db.ref('inquiries').push({ author: loggedInUser, text: txt, timestamp: Date.now() }).then(() => {
+    alert("선생님께 1:1 쪽지가 실시간 발송되었습니다.");
+    document.getElementById('inquiry-text').value = "";
+    closeModal('inquiry-modal');
+  });
+}
+
 function submitSong() {
-  const t = document.getElementById('song-title').value;
-  const a = document.getElementById('song-artist').value;
-  if(!t || !a) { alert("모두 입력해주세요"); return; }
+  const t = document.getElementById('song-title').value.trim();
+  const a = document.getElementById('song-artist').value.trim();
+  if(!t || !a) { alert("정보를 모두 기입하세요."); return; }
   db.ref('songRequests').push({ author: loggedInUser, title: t, artist: a, timestamp: Date.now() }).then(() => {
-    alert("신청되었습니다."); closeModal('song-modal');
+    alert("신청곡 리스트에 추가되었습니다.");
+    document.getElementById('song-title').value = ""; document.getElementById('song-artist').value = "";
+    closeModal('song-modal');
   });
 }
 
 function changePw() {
   const p = document.getElementById('new-pw').value.trim();
   if(!p) return;
-  db.ref('auth/students/' + loggedInUser).set(p).then(() => { alert("변경되었습니다."); closeModal('pw-modal'); });
+  db.ref('auth/students/' + loggedInUser).set(p).then(() => {
+    alert("비밀번호 변경이 정상 완료되었습니다.");
+    document.getElementById('new-pw').value = "";
+    closeModal('pw-modal');
+  });
 }
 
 function openGame(url, title) {
@@ -488,86 +560,83 @@ function closeGame() {
 }
 
 /* =========================================================
-   4. 나이스(NEIS) API 연동 (시간표/급식표)
+   4. 선덕고등학교 나이스(NEIS) 오픈 API 동적 통신 모듈
 ========================================================= */
 const NEIS_KEY = '7be1608e99d34736b6729aab42d32665';
-const ATPT_CODE = 'B10';
-const SCHUL_CODE = '7010536';
+const ATPT_CODE = 'B10'; // 서울특별시교육청
+const SCHUL_CODE = '7010536'; // 선덕고등학교 고유코드
 
-async function fetchNeisData() {
+async function fetchSunduckNeisData() {
   const now = new Date();
   const getFormattedDate = (d) => d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
   const todayStr = getFormattedDate(now);
 
-  // 이번주 월요일~금요일 날짜 구하기
-  const day = now.getDay(); // 0(일) ~ 6(토)
-  const diffToMon = now.getDate() - day + (day === 0 ? -6 : 1); 
-  const monDate = new Date(now.setDate(diffToMon));
+  const currentDayOfWeek = now.getDay(); // 0:일, 1:월 ~ 5:금, 6:토
+  const diffToMon = now.getDate() - currentDayOfWeek + (currentDayOfWeek === 0 ? -6 : 1);
+  const monDate = new Date(now.getFullYear(), now.getMonth(), diffToMon);
   const friDate = new Date(monDate); friDate.setDate(monDate.getDate() + 4);
   
   const fromStr = getFormattedDate(monDate);
   const toStr = getFormattedDate(friDate);
 
-  // 1. 급식 데이터 (오늘 기준)
+  // 급식 조회 파트 (선덕고 고정)
   try {
     const mealRes = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MLSV_YMD=${todayStr}`);
     const mealData = await mealRes.json();
+    document.getElementById('lunch-menu').innerText = "오늘 중식이 없습니다.";
+    document.getElementById('dinner-menu').innerText = "오늘 석식이 없습니다.";
+    
     if (mealData.mealServiceDietInfo) {
       mealData.mealServiceDietInfo[1].row.forEach(m => {
         const menuClean = m.DDISH_NM.replace(/<br\/>/g, ', ').replace(/[0-9.]/g, '').replace(/\*/g, '').trim();
         if(m.MMEAL_SC_NM === '중식') document.getElementById('lunch-menu').innerText = menuClean;
         if(m.MMEAL_SC_NM === '석식') document.getElementById('dinner-menu').innerText = menuClean;
       });
-    } else {
-      document.getElementById('lunch-menu').innerText = "오늘은 급식 정보가 없습니다.";
-      document.getElementById('dinner-menu').innerText = "오늘은 급식 정보가 없습니다.";
     }
-  } catch(e) { console.error("급식 로드 실패", e); }
+  } catch(e) { console.error("급식 동기화 오류", e); }
 
-  // 2. 시간표 데이터 (이번주 월~금)
+  // 시간표 조회 파트 (선덕고 1-4 고정)
   try {
     const timeRes = await fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&TI_FROM_YMD=${fromStr}&TI_TO_YMD=${toStr}&GRADE=1&CLASS_NM=4`);
     const timeData = await timeRes.json();
     
-    // 테이블 초기화 7교시 기준 (배열[교시][요일])
-    let schedule = Array.from({length: 7}, () => Array(5).fill('')); 
+    let matrix = Array.from({length: 7}, () => Array(5).fill('-'));
     
     if (timeData.hisTimetable) {
       timeData.hisTimetable[1].row.forEach(t => {
-        const period = parseInt(t.PERIO) - 1; // 0 ~ 6
+        const period = parseInt(t.PERIO) - 1;
         const dateObj = new Date(t.ALL_TI_YMD.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"));
-        const dayIdx = dateObj.getDay() - 1; // 0(월) ~ 4(금)
+        const dayIdx = dateObj.getDay() - 1; // 0:월 ~ 4:금
         
         if(period >= 0 && period < 7 && dayIdx >= 0 && dayIdx < 5) {
-          schedule[period][dayIdx] = t.ITRT_CNTNT.replace('-',''); // 과목명
+          matrix[period][dayIdx] = t.ITRT_CNTNT;
         }
       });
     }
 
-    // 화면 테이블 그리기
     const tbody = document.getElementById('timetable-body');
     tbody.innerHTML = "";
-    schedule.forEach((row, pIdx) => {
+    matrix.forEach((row, pIdx) => {
       let tr = document.createElement('tr');
-      tr.innerHTML = `<td>${pIdx + 1}교시</td>`;
+      tr.innerHTML = `<td style="background:#f8fafc; border-right:2.5px solid #111;">${pIdx + 1}교시</td>`;
       row.forEach((subject, dIdx) => {
-        const isToday = (day - 1 === dIdx);
-        tr.innerHTML += `<td class="${isToday ? 'today' : ''}">${subject}</td>`;
+        const isTodayColumn = (currentDayOfWeek - 1 === dIdx);
+        tr.innerHTML += `<td class="${isTodayColumn ? 'highlight-day' : ''}">${subject}</td>`;
       });
       tbody.appendChild(tr);
     });
 
-    // 오늘 요일 하이라이트 처리
-    if(day >= 1 && day <= 5) document.getElementById(`th-${day}`).classList.add('today');
+    if(currentDayOfWeek >= 1 && currentDayOfWeek <= 5) {
+      document.getElementById(`th-${currentDayOfWeek}`).classList.add('highlight-day');
+    }
 
-    // 현재 남은 시간 간단 계산기능
+    // 시간 트래킹 대기 알림 루프
     setInterval(() => {
-      const tNow = new Date();
-      // 임시로 현재 시간을 텍스트로 보여줌 (상세 시간표 로직은 학교 시간표 테이블에 맞춰 커스텀 가능)
-      document.getElementById('class-countdown').innerText = `${tNow.getHours()}시 ${tNow.getMinutes()}분 진행중`;
+      const t = new Date();
+      document.getElementById('class-countdown').innerText = `현재 시간 ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
     }, 1000);
 
-  } catch(e) { console.error("시간표 로드 실패", e); }
+  } catch(e) { console.error("시간표 동기화 오류", e); }
 }
 </script>
 </body>
