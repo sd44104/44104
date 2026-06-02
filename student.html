@@ -118,7 +118,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </div>
   <div class="nav-links">
     <button class="nav-item active" onclick="switchTab('home')">대시보드</button>
-    <button class="nav-item" onclick="switchTab('timetable')">시간표/급식안내</button>
+    <button class="nav-item" onclick="switchTab('timetable')">시간표/급식실</button>
     <button class="nav-item" onclick="switchTab('chat')">실시간 커뮤니티</button>
     <button class="nav-item" onclick="switchTab('games')">게임존</button>
     <button class="nav-item" onclick="switchTab('notices')">공지사항</button>
@@ -126,18 +126,17 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </div>
 </nav>
 
-<div class="container" id="main-container">
+<div class="container">
   
   <section class="view-section active" id="view-login">
     <div class="login-container">
       <div class="login-box">
         <h2>로그인 후 사용가능합니다</h2>
         <p>Class 104 학생 통합 인프라 시스템</p>
-        <input type="text" id="login-id" class="login-input" placeholder="아이디">
-        <input type="password" id="login-pw" class="login-input" placeholder="비밀번호" onkeydown="if(event.keyCode==13) doLogin()">
-        <button class="btn-primary" onclick="doLogin()">로그인</button>
-        <button class="btn-outline" style="width: 100%; margin-top: 10px; border-style: dashed;" onclick="gateToAdmin()">ERP 시스템 관리자 로그인</button>
-      </div>
+        <input type="text" id="login-id" class="login-input" placeholder="성명 입력 (예: 홍길동)">
+        <input type="password" id="login-pw" class="login-input" placeholder="비밀번호를 입력하세요" onkeydown="if(event.keyCode==13) doLogin()">
+        <button class="btn-primary" onclick="doLogin()">인증 및 대시보드 진입</button>
+        </div>
     </div>
   </section>
 
@@ -153,21 +152,25 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
             <div class="status-val" id="my-current-status">출석</div>
           </div>
           
-          <div class="section-title">일반반</div>
-          <div class="status-grid" style="margin-bottom: 25px;">
-            <button class="status-btn" onclick="changeStatus('출석')">출석</button>
-            <button class="status-btn" onclick="changeStatus('조퇴')">조퇴</button>
-            <button class="status-btn" onclick="changeStatus('결석')">결석</button>
-            <button class="status-btn" onclick="changeStatus('수학인재반')">수학인재</button>
-            <button class="status-btn" onclick="changeStatus('융합인재반')">융합인재</button>
-            <button class="status-btn" onclick="changeStatus('담임상담')">담임상담</button>
-            <button class="status-btn" onclick="changeStatus('기타')" style="grid-column: span 2;">기타 사유 기입</button>
+          <div id="normal-panel-zone" style="display: none;">
+            <div class="section-title">일반반 구역 제어 권한</div>
+            <div class="status-grid" style="margin-bottom: 25px;">
+              <button class="status-btn" onclick="changeStatus('출석')">출석</button>
+              <button class="status-btn" onclick="changeStatus('조퇴')">조퇴</button>
+              <button class="status-btn" onclick="changeStatus('결석')">결석</button>
+              <button class="status-btn" onclick="changeStatus('수학인재반')">수학인재</button>
+              <button class="status-btn" onclick="changeStatus('융합인재반')">융합인재</button>
+              <button class="status-btn" onclick="changeStatus('담임상담')">담임상담</button>
+              <button class="status-btn" onclick="changeStatus('기타')" style="grid-column: span 2;">기타 사유 기입</button>
+            </div>
           </div>
 
-          <div class="section-title">심화반</div>
-          <div class="status-grid advanced">
-            <button class="status-btn" onclick="changeStatus('1-4 교실자습')">교실 자습</button>
-            <button class="status-btn" onclick="changeStatus('심화반 이동자습')">심화반 자습</button>
+          <div id="advanced-panel-zone" style="display: none;">
+            <div class="section-title">심화반 구역 제어 권한</div>
+            <div class="status-grid advanced">
+              <button class="status-btn" onclick="changeStatus('1-4 교실자습')">교실 자습</button>
+              <button class="status-btn" onclick="changeStatus('심화반 이동자습')">심화반 자습</button>
+            </div>
           </div>
         </div>
       </div>
@@ -257,8 +260,6 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </section>
 </div>
 
-<iframe id="admin-frame" src="admin.html" style="display:none; width:100%; height:calc(100vh - 70px); border:none; background-color: var(--bg-light);"></iframe>
-
 <div class="modal-overlay" id="mobile-id-modal">
   <div class="modal-content" style="max-width: 340px;">
     <h3 style="margin-bottom: 20px; font-weight: 700;">선덕고등학교 원격 모바일학생증</h3>
@@ -312,10 +313,12 @@ const fullRosterRaw = [
 const studentMap = {};
 fullRosterRaw.forEach(s => { studentMap[s.name] = { num: s.num, defaultPw: "104" + s.num, fullName: s.num + " " + s.name }; });
 
+// 요구사항 반영: 기재해주신 심화반 고유 학생 명단
+const advancedStudents = ["강필정", "계시우", "김진영", "이규진", "남궁승후", "송예성", "송지율", "서지호"];
+
 let loggedInUser = null;
 let ddayTimerInterval = null;
 
-// 정규 일과 타임 테이블 정의
 const schoolTimeline = [
   { title: "1교시", start: "08:10", end: "09:00" },
   { title: "쉬는시간", start: "09:00", end: "09:10" },
@@ -332,17 +335,6 @@ const schoolTimeline = [
   { title: "7교시", start: "15:10", end: "16:00" }
 ];
 
-// 요청하신 고정 시간표 데이터 적용 (나이스 API 대체)
-const fixedSchedule = [
-  ["국어A", "창독", "통사", "통사", "체육"],
-  ["체육", "정보", "영어A", "수학B", "통과"],
-  ["통과", "통사", "통과", "음악", "한국사"],
-  ["수학A", "국어B", "정보", "과탐실", "음악"],
-  ["한국사", "진로", "창체", "국어A", "진로"],
-  ["음악", "통과", "창체", "수학A", "수학A"],
-  ["영어B", "한국사", "창체", "정보", "영어A"]
-];
-
 window.onload = () => {
   const savedUser = localStorage.getItem('savedStudentName');
   if (savedUser && studentMap[savedUser]) {
@@ -351,21 +343,10 @@ window.onload = () => {
   }
 };
 
-// 3. 관리자 페이지 팝업(새 창) 제거 및 Iframe 제어로 변경
 function gateToAdmin() {
-  // 이미 관리자 권한이 있는 경우 즉시 Iframe 표시
-  if (localStorage.getItem('isMasterAdmin') === 'true') {
-    document.getElementById('top-nav').style.display = 'flex';
-    document.getElementById('main-container').style.display = 'none';
-    const adminFrame = document.getElementById('admin-frame');
-    adminFrame.style.display = 'block';
-    adminFrame.src = adminFrame.src; // 새로고침(업데이트 반영)
-    return;
-  }
-
-  const idPrompt = prompt("ERP 접속용 관리자 ID:");
+  const idPrompt = prompt("ERP 제어소 접속용 관리자 ID를 고유 기입하세요:");
   if(!idPrompt) return;
-  const pwPrompt = prompt("패스워드:");
+  const pwPrompt = prompt("인프라 관리자 Access 패스워드를 입력하세요:");
   if(!pwPrompt) return;
 
   db.ref('auth/adminAccounts/' + idPrompt).once('value').then(snap => {
@@ -373,13 +354,9 @@ function gateToAdmin() {
       localStorage.setItem('adminUser', snap.val().name);
       localStorage.setItem('adminId', idPrompt);
       localStorage.setItem('isMasterAdmin', 'true');
-      
-      // 권한 확인 완료 시 Iframe 페이지 활성화
-      document.getElementById('top-nav').style.display = 'flex';
-      document.getElementById('main-container').style.display = 'none';
-      document.getElementById('admin-frame').style.display = 'block';
+      location.href = 'admin.html';
     } else {
-      alert("⚠️ 내부 보안 정보 불일치: 접근 권한이 없습니다. 관리자에게 문의.");
+      alert("⚠️ 내부 보안 인프라 불일치: 접근 권한 권외 등급입니다.");
     }
   });
 }
@@ -413,6 +390,15 @@ function initApp() {
   document.getElementById('user-name-display').innerText = loggedInUser;
   switchTab('home');
   
+  // 요구사항 반영: 로그인한 학생 명단을 대조하여 일반반/심화반 구역을 자동 필터링 노출
+  if (advancedStudents.includes(loggedInUser)) {
+    document.getElementById('normal-panel-zone').style.display = 'none';
+    document.getElementById('advanced-panel-zone').style.display = 'block';
+  } else {
+    document.getElementById('normal-panel-zone').style.display = 'block';
+    document.getElementById('advanced-panel-zone').style.display = 'none';
+  }
+
   trackStatus();
   trackChat();
   trackNotices();
@@ -425,14 +411,10 @@ function initApp() {
     JsBarcode("#barcode-canvas", code, { format: "CODE128", displayValue: true, width: 2, height: 50 });
   });
 
-  fetchNeisData(); // 급식과 시간표 엔진 실행
+  fetchNeisData();
 }
 
 function switchTab(tabId) {
-  // 관리자 iframe이 열려있다면 숨기고 기존 대시보드로 돌아오기
-  document.getElementById('admin-frame').style.display = 'none';
-  document.getElementById('main-container').style.display = ''; 
-
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   
@@ -583,14 +565,20 @@ function closeGame() {
 
 const NEIS_KEY = '7be1608e99d34736b6729aab42d32665';
 const ATPT_CODE = 'B10';
-const SCHUL_CODE = 'B100000465';
+const SCHUL_CODE = 'B100000465'; // 선덕고등학교 전용 코드 고정
 
 async function fetchNeisData() {
   const now = new Date();
   const getFormattedDate = (d) => d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
   const todayStr = getFormattedDate(now);
 
-  // 급식 API만 유지 (급식 정보는 계속 업데이트 받아옴)
+  const day = now.getDay();
+  const diffToMon = now.getDate() - day + (day === 0 ? -6 : 1); 
+  const monDate = new Date(now.setDate(diffToMon));
+  const friDate = new Date(monDate); friDate.setDate(monDate.getDate() + 4);
+  
+  const fromStr = getFormattedDate(monDate); const toStr = getFormattedDate(friDate);
+
   try {
     const mealRes = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MLSV_YMD=${todayStr}`);
     const mealData = await mealRes.json();
@@ -601,21 +589,29 @@ async function fetchNeisData() {
         if(m.MMEAL_SC_NM === '석식') document.getElementById('dinner-menu').innerText = menuClean;
       });
     } else {
-      document.getElementById('lunch-menu').innerText = "서비스 준비중...";
-      document.getElementById('dinner-menu').innerText = "서비스 준비중...";
+      document.getElementById('lunch-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
+      document.getElementById('dinner-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
     }
-  } catch(e) { 
-    console.error("급식 데이터 미러링 실패", e); 
-    document.getElementById('lunch-menu').innerText = "급식 서버 접속 지연.";
-    document.getElementById('dinner-menu').innerText = "급식 서버 접속 지연.";
-  }
+  } catch(e) { console.error("급식 데이터 미러링 실패", e); }
 
-  // 나이스 시간표 API 완전 삭제 & 고정 시간표 적용
-  const day = now.getDay();
-  const tbody = document.getElementById('timetable-body');
-  if (tbody) {
+  try {
+    const timeRes = await fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&TI_FROM_YMD=${fromStr}&TI_TO_YMD=${toStr}&GRADE=1&CLASS_NM=4`);
+    const timeData = await timeRes.json();
+    
+    let schedule = Array.from({length: 7}, () => Array(5).fill('-')); 
+    
+    if (timeData.hisTimetable) {
+      timeData.hisTimetable[1].row.forEach(t => {
+        const period = parseInt(t.PERIO) - 1;
+        const dateObj = new Date(t.ALL_TI_YMD.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"));
+        const dayIdx = dateObj.getDay() - 1;
+        if(period >= 0 && period < 7 && dayIdx >= 0 && dayIdx < 5) { schedule[period][dayIdx] = t.ITRT_CNTNT.replace('-',''); }
+      });
+    }
+
+    const tbody = document.getElementById('timetable-body'); if(!tbody) return;
     tbody.innerHTML = "";
-    fixedSchedule.forEach((row, pIdx) => {
+    schedule.forEach((row, pIdx) => {
       let tr = document.createElement('tr');
       tr.innerHTML = `<td style="background:#f8fafc; font-weight:700;">${pIdx + 1}교시</td>`;
       row.forEach((subject, dIdx) => {
@@ -629,45 +625,41 @@ async function fetchNeisData() {
       const targetTh = document.getElementById(`th-${day}`);
       if(targetTh) targetTh.classList.add('today');
     }
-  }
 
-  // 실시간 일과 모니터링 엔진 가동 (고정 배열과 매칭)
-  const calculateCurrentClassStatus = () => {
-    const tNow = new Date();
-    const currentMinutes = tNow.getHours() * 60 + tNow.getMinutes();
-    
-    let matchedStatus = "방과 후 일과 종료 또는 주말";
-    
-    if (day >= 1 && day <= 5) {
-      for(let item of schoolTimeline) {
-        const startParts = item.start.split(":");
-        const endParts = item.end.split(":");
-        const startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-        const endMin = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-        
-        if(currentMinutes >= startMin && currentMinutes < endMin) {
-          if(item.title.includes("교시")) {
-            const periodIdx = parseInt(item.title.replace("교시","")) - 1;
-            // fixedSchedule에서 교시 과목 가져오기
-            const subjectName = (fixedSchedule[periodIdx] && fixedSchedule[periodIdx][day-1]) ? fixedSchedule[periodIdx][day-1] : "";
-            matchedStatus = `${item.title} [${subjectName || '수업'}] 진행 중`;
-          } else {
-            matchedStatus = `🍿 지금은 ${item.title}입니다!`;
+    const calculateCurrentClassStatus = () => {
+      const tNow = new Date();
+      const currentMinutes = tNow.getHours() * 60 + tNow.getMinutes();
+      
+      let matchedStatus = "방과 후 일과 종료 또는 주말";
+      
+      if (day >= 1 && day <= 5) {
+        for(let item of schoolTimeline) {
+          const startParts = item.start.split(":");
+          const endParts = item.end.split(":");
+          const startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+          const endMin = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+          
+          if(currentMinutes >= startMin && currentMinutes < endMin) {
+            if(item.title.includes("교시")) {
+              const periodIdx = parseInt(item.title.replace("교시","")) - 1;
+              const subjectName = (schedule[periodIdx] && schedule[periodIdx][day-1]) ? schedule[periodIdx][day-1] : "";
+              matchedStatus = `${item.title} [${subjectName || '수업'}] 진행 중`;
+            } else {
+              matchedStatus = `🍿 지금은 ${item.title}입니다!`;
+            }
+            break;
           }
-          break;
         }
       }
-    }
-    
-    const timeClockStr = `${String(tNow.getHours()).padStart(2,'0')}시 ${String(tNow.getMinutes()).padStart(2,'0')}분`;
-    const cdEl = document.getElementById('class-countdown');
-    if (cdEl) {
-      cdEl.innerHTML = `<div style="font-weight:800; color:var(--primary-color);">${matchedStatus}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">(${timeClockStr} 실시간 동기화)</div>`;
-    }
-  };
+      
+      const timeClockStr = `${String(tNow.getHours()).padStart(2,'0')}시 ${String(tNow.getMinutes()).padStart(2,'0')}분`;
+      document.getElementById('class-countdown').innerHTML = `<div style="font-weight:800; color:var(--primary-color);">${matchedStatus}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">(${timeClockStr} 실시간 동기화)</div>`;
+    };
 
-  setInterval(calculateCurrentClassStatus, 1000);
-  calculateCurrentClassStatus();
+    setInterval(calculateCurrentClassStatus, 1000);
+    calculateCurrentClassStatus();
+
+  } catch(e) { console.error("시간표 나이스 API 바인딩 에러", e); }
 }
 </script>
 </body>
