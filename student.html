@@ -118,7 +118,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </div>
   <div class="nav-links">
     <button class="nav-item active" onclick="switchTab('home')">대시보드</button>
-    <button class="nav-item" onclick="switchTab('timetable')">시간표/급식실</button>
+    <button class="nav-item" onclick="switchTab('timetable')">시간표/급식안내</button>
     <button class="nav-item" onclick="switchTab('chat')">실시간 커뮤니티</button>
     <button class="nav-item" onclick="switchTab('games')">게임존</button>
     <button class="nav-item" onclick="switchTab('notices')">공지사항</button>
@@ -133,10 +133,10 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
       <div class="login-box">
         <h2>로그인 후 사용가능합니다</h2>
         <p>Class 104 학생 통합 인프라 시스템</p>
-        <input type="text" id="login-id" class="login-input" placeholder="성명 입력 (예: 홍길동)">
-        <input type="password" id="login-pw" class="login-input" placeholder="비밀번호를 입력하세요" onkeydown="if(event.keyCode==13) doLogin()">
-        <button class="btn-primary" onclick="doLogin()">인증 및 대시보드 진입</button>
-        <button class="btn-outline" style="width: 100%; margin-top: 10px; border-style: dashed;" onclick="gateToAdmin()">ERP 제어소 시스템 관리자 로그인</button>
+        <input type="text" id="login-id" class="login-input" placeholder="아이디">
+        <input type="password" id="login-pw" class="login-input" placeholder="비밀번호" onkeydown="if(event.keyCode==13) doLogin()">
+        <button class="btn-primary" onclick="doLogin()">로그인</button>
+        <button class="btn-outline" style="width: 100%; margin-top: 10px; border-style: dashed;" onclick="gateToAdmin()">ERP 시스템 관리자 로그인</button>
       </div>
     </div>
   </section>
@@ -153,7 +153,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
             <div class="status-val" id="my-current-status">출석</div>
           </div>
           
-          <div class="section-title">일반반 구역 제어 권한</div>
+          <div class="section-title">일반반</div>
           <div class="status-grid" style="margin-bottom: 25px;">
             <button class="status-btn" onclick="changeStatus('출석')">출석</button>
             <button class="status-btn" onclick="changeStatus('조퇴')">조퇴</button>
@@ -164,7 +164,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
             <button class="status-btn" onclick="changeStatus('기타')" style="grid-column: span 2;">기타 사유 기입</button>
           </div>
 
-          <div class="section-title">심화반 구역 제어 권한</div>
+          <div class="section-title">심화반</div>
           <div class="status-grid advanced">
             <button class="status-btn" onclick="changeStatus('1-4 교실자습')">교실 자습</button>
             <button class="status-btn" onclick="changeStatus('심화반 이동자습')">심화반 자습</button>
@@ -363,9 +363,9 @@ function gateToAdmin() {
     return;
   }
 
-  const idPrompt = prompt("ERP 제어소 접속용 관리자 ID를 고유 기입하세요:");
+  const idPrompt = prompt("ERP 접속용 관리자 ID:");
   if(!idPrompt) return;
-  const pwPrompt = prompt("인프라 관리자 Access 패스워드를 입력하세요:");
+  const pwPrompt = prompt("패스워드:");
   if(!pwPrompt) return;
 
   db.ref('auth/adminAccounts/' + idPrompt).once('value').then(snap => {
@@ -379,7 +379,7 @@ function gateToAdmin() {
       document.getElementById('main-container').style.display = 'none';
       document.getElementById('admin-frame').style.display = 'block';
     } else {
-      alert("⚠️ 내부 보안 인프라 불일치: 접근 권한 권외 등급입니다.");
+      alert("⚠️ 내부 보안 정보 불일치: 접근 권한이 없습니다. 관리자에게 문의.");
     }
   });
 }
@@ -601,8 +601,8 @@ async function fetchNeisData() {
         if(m.MMEAL_SC_NM === '석식') document.getElementById('dinner-menu').innerText = menuClean;
       });
     } else {
-      document.getElementById('lunch-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
-      document.getElementById('dinner-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
+      document.getElementById('lunch-menu').innerText = "서비스 준비중...";
+      document.getElementById('dinner-menu').innerText = "서비스 준비중...";
     }
   } catch(e) { 
     console.error("급식 데이터 미러링 실패", e); 
