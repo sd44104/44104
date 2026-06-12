@@ -12,16 +12,7 @@
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-:root {
-  --primary-color: #4361ee;
-  --primary-hover: #3a0ca3;
-  --bg-light: #f8f9fa;
-  --text-dark: #212529;
-  --text-muted: #6c757d;
-  --card-bg: #ffffff;
-  --border-color: #e9ecef;
-}
-
+:root { --primary-color: #4361ee; --primary-hover: #3a0ca3; --bg-light: #f8f9fa; --text-dark: #212529; --text-muted: #6c757d; --card-bg: #ffffff; --border-color: #e9ecef; }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
 body { background-color: var(--bg-light); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
 
@@ -35,6 +26,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .nav-item.active { background: #e0f2fe; color: #0284c7; }
 .btn-outline { border: 1px solid #dee2e6; background: transparent; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; color: var(--text-dark); }
 .btn-outline:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+.btn-admin-gate { border: 2px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
 /* 메인 레이아웃 및 뷰 세션 */
 .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; flex-grow: 1; width: 100%; }
@@ -47,13 +39,13 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .login-box { background: var(--card-bg); padding: 45px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align: center; width: 100%; max-width: 420px; }
 .login-box h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
 .login-box p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
-
 .login-input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; outline: none; transition: border 0.2s; }
 .login-input:focus { border-color: var(--primary-color); }
 .btn-primary { width: 100%; padding: 14px; background: var(--primary-color); color: #fff; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
 .btn-primary:hover { background: var(--primary-hover); }
 
 /* 홈 대시보드 내부 레이아웃 */
+.notice-banner { background: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 15px 20px; border-radius: 12px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .home-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
 .panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 25px; }
 .section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -83,6 +75,15 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .cam-btn { background: #fff1f2; border-color: #fecdd3; color: #e11d48; flex-direction: row; justify-content: center; font-size: 1rem; cursor: pointer; border-radius: 12px; border: 1px solid; font-weight: 700;}
 .cam-btn.streaming { background: #22c55e; color: #fff; border-color: #16a34a; }
 
+/* 시간표/급식실 */
+.time-meal-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
+.timetable-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.95rem; table-layout: fixed; }
+.timetable-table th, .timetable-table td { border: 1px solid var(--border-color); padding: 15px 8px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.timetable-table th { background: #f1f5f9; color: var(--text-muted); font-size: 0.85rem; }
+.timetable-table td.today { background: #e0f2fe; color: #0369a1; border: 2px solid #7dd3fc; font-weight: 700; }
+.meal-box { border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #fff; }
+.meal-box h4 { border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
 /* 커뮤니티 채팅창 */
 .chat-container { display: flex; flex-direction: column; height: 60vh; border: 1px solid var(--border-color); border-radius: 14px; background: #fff; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
 .chat-logs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #f8fafc; }
@@ -105,9 +106,12 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </div>
   <div class="nav-links">
     <button class="nav-item active" id="nav-btn-home" onclick="switchTab('home')">대시보드</button>
+    <button class="nav-item" id="nav-btn-timetable" onclick="switchTab('timetable')">시간표/급식실</button>
     <button class="nav-item" id="nav-btn-chat" onclick="switchTab('chat')">실시간 커뮤니티</button>
     <button class="nav-item" id="nav-btn-camstudy" onclick="switchTab('camstudy')">우리반 캠스터디</button>
     <button class="nav-item" id="nav-btn-games" onclick="switchTab('games')">게임존</button>
+    <button class="nav-item" id="nav-btn-notices" onclick="switchTab('notices')">공지사항</button>
+    <button class="btn-outline btn-admin-gate" id="nav-btn-admin" onclick="gateToAdmin()"><i class="fa-solid fa-lock"></i> 관리자 로그인</button>
   </div>
 </nav>
 
@@ -172,7 +176,33 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
           <div class="util-grid">
             <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.riroschool.kr')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
             <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.sen.hs.kr')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
+            <button class="util-btn" onclick="openModal('mobile-id-modal')" style="grid-column: span 2; background: #f0fdf4; border-color: #bbf7d0; color: #166534;"><i class="fa-solid fa-id-badge" style="color: #15803d;"></i> 모바일 원격 학생증 조회</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view-section" id="view-timetable">
+    <div class="time-meal-grid">
+      <div class="panel">
+        <table class="timetable-table" id="timetable-matrix">
+          <thead>
+            <tr><th>교시</th><th id="th-1">월요일</th><th id="th-2">화요일</th><th id="th-3">수요일</th><th id="th-4">목요일</th><th id="th-5">금요일</th></tr>
+          </thead>
+          <tbody id="timetable-body">
+            </tbody>
+        </table>
+      </div>
+      
+      <div>
+        <div class="panel meal-box">
+          <h4><i class="fa-solid fa-bowl-food" style="color: #f59e0b;"></i> 오늘 중식 메뉴</h4>
+          <div id="lunch-menu" style="line-height: 1.6; font-size: 0.9rem; color: var(--text-dark);">식단 로딩 중...</div>
+        </div>
+        <div class="panel meal-box">
+          <h4><i class="fa-solid fa-utensils" style="color: #10b981;"></i> 오늘 석식 메뉴</h4>
+          <div id="dinner-menu" style="line-height: 1.6; font-size: 0.9rem; color: var(--text-dark);">식단 로딩 중...</div>
         </div>
       </div>
     </div>
@@ -226,6 +256,24 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
       </div>
     </div>
   </section>
+
+  <section class="view-section" id="view-notices">
+    <div class="panel">
+      <h3 style="font-size: 1.2rem; margin-bottom: 20px; font-weight: 700;"><i class="fa-solid fa-bell"></i> 반 전체 공지사항</h3>
+      <div id="full-notice-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-overlay" id="mobile-id-modal">
+  <div class="modal-content" style="max-width: 340px;">
+    <h3 style="margin-bottom: 20px; font-weight: 700;">선덕고등학교 원격 모바일학생증</h3>
+    <div style="width: 90px; height: 90px; border-radius: 50%; background: #e2e8f0; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #94a3b8;"><i class="fa-solid fa-user"></i></div>
+    <h2 id="id-name" style="margin-bottom: 5px; font-weight: 800;">이름</h2>
+    <p id="id-number" style="color: var(--text-muted); margin-bottom: 20px; letter-spacing: 2px; font-weight: 700;">10400</p>
+    <svg id="barcode-canvas" style="width:100%; height:80px; margin-bottom: 20px;"></svg>
+    <button class="btn-primary" style="background:#64748b;" onclick="closeModal('mobile-id-modal')">닫기</button>
+  </div>
 </div>
 
 <script>
@@ -238,7 +286,6 @@ const fullRosterRaw = [
 ];
 const studentMap = {};
 fullRosterRaw.forEach(s => { studentMap[s.name] = { num: s.num, defaultPw: "104" + s.num, fullName: s.num + " " + s.name }; });
-
 const advancedStudents = ["강필정", "계시우", "김진영", "이규진", "남궁승후", "송예성", "송지율", "서지호"];
 
 let loggedInUser = null;
@@ -276,6 +323,11 @@ function initApp() {
     document.getElementById('view-home').classList.add('active');
     document.getElementById('top-nav').style.display = 'flex';
     document.getElementById('user-name-display').innerText = loggedInUser;
+    
+    // 학생증 정보 세팅
+    document.getElementById('id-name').innerText = loggedInUser;
+    document.getElementById('id-number').innerText = "104" + studentMap[loggedInUser].num;
+    try { JsBarcode("#barcode-canvas", "104" + studentMap[loggedInUser].num, {format: "CODE39", displayValue: false, height: 50}); } catch(e){}
     
     if(advancedStudents.includes(loggedInUser)) {
         document.getElementById('advanced-panel-zone').style.display = 'block';
@@ -320,9 +372,14 @@ function closePortalView() {
   document.getElementById('main-contents-wrapper').style.display = 'block';
 }
 
-// ============== 우리반 캠스터디 다자간 + 대시보드 동시 연결엔진 ==============
-const globalIceConfig = { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] } };
+function gateToAdmin() {
+  window.location.href = "admin.html"; // 실제 관리자 페이지 진입 연결
+}
 
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ============== 우리반 캠스터디 통신 로직 (대시보드 핑 감지 추가) ==============
 let localStream = null;
 let myPeer = null;
 let isCamActive = false;
@@ -332,7 +389,6 @@ async function toggleStudyCam() {
     const btn = document.getElementById('btn-toggle-cam-study');
     
     if (isCamActive) {
-        // 종료 처리
         if (localStream) localStream.getTracks().forEach(t => t.stop());
         if (myPeer) { myPeer.destroy(); myPeer = null; }
         
@@ -349,7 +405,6 @@ async function toggleStudyCam() {
         connectedPeers = {};
         isCamActive = false;
     } else {
-        // 실행 처리
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             document.getElementById('my-cam-video-study').srcObject = localStream;
@@ -362,27 +417,23 @@ async function toggleStudyCam() {
             const myNum = studentMap[loggedInUser].num;
             const myPeerId = 'CLASS104_STUDENT_' + myNum;
             
-            myPeer = new Peer(myPeerId, globalIceConfig);
+            // 안정적인 PeerJS 기본망
+            myPeer = new Peer(myPeerId);
 
             myPeer.on('open', (id) => {
-                // 1. 파이어베이스에 내 활성 상태 업로드
                 db.ref('camStudy/activePeers/' + myNum).set({ name: loggedInUser, peerId: id });
                 
-                // 2. [오류 수정 핵심] 대시보드로 내 스트림 쏘기 (대시보드가 켜져있을 때 인식)
-                myPeer.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream, { metadata: { userName: loggedInUser } });
+                // 처음 켰을 때 대시보드로 콜
+                setTimeout(() => callDashboard(), 500);
 
-                // 3. 다른 학생방에 있던 친구들에게 내 스트림 전송
                 db.ref('camStudy/activePeers').once('value', snap => {
                     snap.forEach(child => {
                         const remoteData = child.val();
-                        if (child.key !== myNum) {
-                            callPeer(remoteData.peerId, remoteData.name);
-                        }
+                        if (child.key !== myNum) callPeer(remoteData.peerId, remoteData.name);
                     });
                 });
             });
 
-            // 4. 나중에 들어온 다른 친구가 전송한 화면 수신
             myPeer.on('call', call => {
                 call.answer(localStream); 
                 call.on('stream', remoteStream => {
@@ -393,11 +444,23 @@ async function toggleStudyCam() {
             });
 
         } catch (e) {
-            alert('카메라 장치를 확인해 주세요.');
+            alert('카메라 권한을 허용해주세요!');
             console.error(e);
         }
     }
 }
+
+function callDashboard() {
+    if (!myPeer || !localStream) return;
+    myPeer.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream, { metadata: { userName: loggedInUser } });
+}
+
+// [핵심 패치] 대시보드가 새로고침되어 핑을 보내면, 내 스트림을 다시 강제로 쏴줌!
+db.ref('camStudy/dashboardPing').on('value', snap => {
+    if (isCamActive && myPeer && snap.exists()) {
+        callDashboard();
+    }
+});
 
 function callPeer(peerId, name) {
     if (connectedPeers[peerId] || peerId === 'CLASS104_ELECTRONIC_BLACKBOARD_2026') return;

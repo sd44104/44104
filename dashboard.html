@@ -25,21 +25,21 @@ body { background: var(--bg-color); color: var(--text-color); overflow: hidden; 
 .global-notice-bar { background: rgba(49, 130, 246, 0.1); border-bottom: 1px solid rgba(49, 130, 246, 0.2); padding: 15px 50px; display: none; align-items: center; gap: 30px; font-size: 32px; font-weight: 800; flex-shrink: 0; color: var(--text-color); }
 .global-notice-badge { background: var(--theme-color); color: #fff; padding: 10px 25px; border-radius: 12px; font-size: 28px; font-weight: 900; white-space: nowrap; }
 
-/* Active Board */
-#active-board { flex: 1; display: none; padding: 40px 80px; overflow-y: auto; gap: 60px; }
+/* Active Board - 스크롤 원천 차단 (overflow: hidden) */
+#active-board { flex: 1; display: none; padding: 40px 80px; overflow: hidden; gap: 60px; align-items: stretch; }
 .main-title { font-size: 60px; font-weight: 900; text-align: left; margin-bottom: 50px; }
 .info-row { display: flex; align-items: flex-start; font-size: 45px; font-weight: 800; margin-bottom: 40px; }
-.info-label { width: 300px; color: #8B95A1; }
+.info-label { width: 300px; color: #8B95A1; flex-shrink: 0; }
 .info-value { color: var(--theme-color); font-size: 55px; font-weight: 900; }
-.spec-container { flex: 1; font-size: 40px; font-weight: 700; line-height: 1.6; }
+.spec-container { flex: 1; font-size: 40px; font-weight: 700; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 15px; }
 .spec-names { color: #34C759; }
 .spec-names.absent { color: #F04452; }
 
 /* 실시간 열공 캠 보드 */
-#side-rank-board { flex: 1; background: var(--panel-bg); border-radius: 30px; padding: 40px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+#side-rank-board { flex: 1; background: var(--panel-bg); border-radius: 30px; padding: 40px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border-color); overflow: hidden; }
 .side-box-title { display: flex; justify-content: space-between; align-items: center; font-size: 36px; font-weight: 900; color: var(--theme-color); border-bottom: 2px solid var(--border-color); padding-bottom: 15px; flex-shrink: 0; }
 .cam-count-badge { background: var(--theme-color); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 24px; font-weight: bold; }
-#cam-mosaic-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; align-content: start; padding-right: 15px; padding-top: 10px; }
+#cam-mosaic-grid { flex: 1; overflow: hidden; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; align-content: start; padding-right: 15px; padding-top: 10px; }
 .cam-box { position: relative; background: #000; border-radius: 15px; overflow: hidden; aspect-ratio: 4/3; border: 2px solid var(--border-color); box-shadow: 0 5px 15px rgba(0,0,0,0.1); animation: popIn 0.3s ease; }
 .cam-box video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 .cam-label { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fff; font-size: 16px; padding: 4px 10px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
@@ -50,7 +50,7 @@ body { background: var(--bg-color); color: var(--text-color); overflow: hidden; 
 }
 
 /* Idle Screen */
-#idle-screen { display: none; flex: 1; padding: 50px; display: flex; gap: 40px; align-items: stretch; overflow-y: hidden; }
+#idle-screen { display: none; flex: 1; padding: 50px; display: flex; gap: 40px; align-items: stretch; overflow: hidden; }
 
 /* Overlays */
 #break-overlay, #end-overlay, #black-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5000; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
@@ -78,78 +78,16 @@ body[data-theme="dark"] #notice-overlay { background: rgba(0, 0, 0, 0.95); }
 #song-popup-ui { display: none; position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: var(--panel-bg); border: 3px solid var(--theme-color); padding: 30px 60px; border-radius: 30px; z-index: 9999; box-shadow: 0 15px 40px rgba(0,0,0,0.2); flex-direction: column; align-items: center; gap: 10px; text-align: center; }
 .song-popup-title { font-size: 50px; font-weight: 900; color: var(--text-color); }
 .song-popup-artist { font-size: 30px; font-weight: 700; color: #8B95A1; }
-
-.tool-fab { position: fixed; left: 40px; bottom: 130px; background: var(--theme-color); color: #fff; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 8000; transition: 0.2s; }
-.tool-fab:hover { transform: scale(1.05); }
-.tool-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 9500; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
-.tool-modal.show { display: flex; opacity: 1; }
-.tool-content { background: var(--glass-bg); border: 1px solid var(--border-color); border-radius: 30px; padding: 40px; width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;}
-.tool-section { background: var(--bg-color); padding: 25px; border-radius: 20px; text-align: center; }
-.sw-display { font-size: 50px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--text-color); margin-bottom: 15px;}
-.sw-controls { display: flex; gap: 10px; justify-content: center; }
-.sw-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; background: var(--border-color); color: var(--text-color); transition: 0.2s; }
-.sw-btn.start { background: var(--theme-color); color: #fff; }
-.sw-btn.stop { background: #F04452; color: #fff; }
-
-.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); border-radius: 34px; transition: .4s; }
-.slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-input:checked + .slider { background-color: var(--theme-color); }
-input:checked + .slider:before { transform: translateX(22px); }
-
-#fs-clock-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
-#fs-clock-text { font-size: 18vw; font-weight: 900; color: var(--theme-color); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body data-theme="light">
-
-<div id="fs-clock-overlay" onclick="this.style.display='none'">
-  <div style="color:#888; font-size:30px; margin-bottom:20px; font-weight:bold;">화면을 클릭하면 원래대로 돌아갑니다</div>
-  <div id="fs-clock-text">00:00:00</div>
-</div>
-
-<div class="tool-fab" onclick="document.getElementById('tool-modal').classList.add('show')"><i class="fa-solid fa-toolbox"></i></div>
-
-<div class="tool-modal" id="tool-modal">
-  <div class="tool-content">
-    <h3 style="font-size: 24px; font-weight:800; color:var(--text-color); border-bottom:2px solid var(--border-color); padding-bottom:15px;"><i class="fa-solid fa-layer-group"></i> 보조 기능 툴박스</h3>
-    <div class="tool-section">
-      <div style="font-size:16px; font-weight:bold; margin-bottom:10px; text-align:left;">⏱️ 스톱워치</div>
-      <div class="sw-display" id="sw-time">00:00:00</div>
-      <div class="sw-controls">
-        <button class="sw-btn start" onclick="startStopwatch()">시작</button>
-        <button class="sw-btn stop" onclick="stopStopwatch()">정지</button>
-        <button class="sw-btn" onclick="resetStopwatch()">초기화</button>
-      </div>
-    </div>
-    <div class="tool-section" style="text-align: left;">
-      <div style="font-size:16px; font-weight:bold; margin-bottom:15px; display:flex; justify-content:space-between;">
-        <span><i class="fa-solid fa-expand" style="color:#34C759;"></i> 쉬는시간 전체화면 팝업</span>
-        <label class="switch"><input type="checkbox" id="break-overlay-toggle" checked onchange="allowBreakOverlay=this.checked; checkYajaTimer(new Date(), new Date().getDay());"><span class="slider"></span></label>
-      </div>
-      <div style="font-size:16px; font-weight:bold; margin-bottom:15px; display:flex; justify-content:space-between;">
-        <span><i class="fa-solid fa-moon"></i> 다크 모드 켜기</span>
-        <label class="switch"><input type="checkbox" onchange="document.body.setAttribute('data-theme', this.checked ? 'dark' : 'light');"><span class="slider"></span></label>
-      </div>
-    </div>
-    <button class="sw-btn" style="background:#191F28; color:#fff;" onclick="document.getElementById('tool-modal').classList.remove('show')">닫기</button>
-  </div>
-</div>
-
-<div id="tts-unlocker" style="position:fixed; top:0; left:0; width:100%; background:rgba(49,130,246,0.95); color:#fff; text-align:center; padding:15px; font-size:24px; font-weight:900; z-index:9999; cursor:pointer;" onclick="unlockTTS()">💡 음성(TTS)을 활성화하려면 한 번 클릭하세요. (클릭 시 사라짐)</div>
-
-<div id="song-popup-ui">
-  <div class="song-popup-title" id="song-popup-title">노래 제목</div>
-  <div class="song-popup-artist" id="song-popup-artist">가수이름</div>
-</div>
 
 <div id="break-overlay"><div class="massive-text" id="break-title">쉬는 시간입니다!</div><div class="massive-timer" id="break-timer-text">00:00</div></div>
 <div id="end-overlay"><div class="massive-text" style="font-size: 70px; line-height:1.5;">오늘 일과가 종료되었습니다.<br>조심해서 들어가세요🥹</div></div>
 <div id="black-overlay"></div>
 
 <div class="top-bar">
-  <div class="clock" id="live-clock" title="클릭 시 전체화면 시계" onclick="document.getElementById('fs-clock-overlay').style.display='flex'">오전 00:00:00</div>
+  <div class="clock" id="live-clock">오전 00:00:00</div>
   <div class="status-txt" id="timer-status-bar">따뜻한 마음과 성실한 걸음으로</div>
 </div>
 
@@ -159,11 +97,14 @@ input:checked + .slider:before { transform: translateX(22px); }
 </div>
 
 <div id="active-board">
-  <div style="flex: 1.5;">
+  <div style="flex: 1.5; display: flex; flex-direction: column;">
     <div class="main-title" id="main-date-title">학급 현황판</div>
     <div class="info-row"><div class="info-label">전체인원</div><div class="info-value" id="val-total-count">26명</div></div>
     <div class="info-row"><div class="info-label">현재인원</div><div class="info-value" id="val-current-count">26명</div></div>
-    <div class="info-row"><div class="info-label">특이사항</div><div class="spec-container" id="val-spec-list"></div></div>
+    <div class="info-row" style="flex:1; overflow:hidden;">
+        <div class="info-label">특이사항</div>
+        <div class="spec-container" id="val-spec-list"></div>
+    </div>
   </div>
   
   <div id="side-rank-board">
@@ -196,69 +137,18 @@ input:checked + .slider:before { transform: translateX(22px); }
 var firebaseConfig = { apiKey: "AlzaSyBsYbl11XCtPyUkby8GzEJHlxw_T28WNrg", authDomain: "class4-board-f6054.firebaseapp.com", databaseURL: "https://class4-board-f6054-default-rtdb.firebaseio.com/", projectId: "class4-board-f6054" };
 firebase.initializeApp(firebaseConfig); var db = firebase.database();
 
-let allowBreakOverlay = true;
-function unlockTTS() { if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance('')); document.getElementById('tts-unlocker').style.display = 'none'; }
-
 let forceBlackScreen = false;
 db.ref('config/blackScreen').on('value', snap => { forceBlackScreen = snap.val() === true; });
 
-const FULL_TIMETABLE = [
-  { id: "1교시", type: "class", start: "08:00", end: "08:50" }, { id: "쉬는 시간", type: "break", start: "08:50", end: "09:00" },
-  { id: "2교시", type: "class", start: "09:00", end: "09:50" }, { id: "쉬는 시간", type: "break", start: "09:50", end: "10:00" },
-  { id: "3교시", type: "class", start: "10:00", end: "10:50" }, { id: "쉬는 시간", type: "break", start: "10:50", end: "11:00" },
-  { id: "4교시", type: "class", start: "11:00", end: "11:50" }, { id: "점심 시간", type: "break", start: "11:50", end: "12:55" },
-  { id: "5교시", type: "class", start: "12:55", end: "13:45" }, { id: "쉬는 시간", type: "break", start: "13:45", end: "13:55" },
-  { id: "6교시", type: "class", start: "13:55", end: "14:45" }, { id: "쉬는 시간", type: "break", start: "14:45", end: "14:55" },
-  { id: "7교시", type: "class", start: "14:55", end: "15:45" }, { id: "종례시간", type: "break", start: "15:45", end: "15:50" },
-  { id: "8교시 이동", type: "break", start: "15:50", end: "16:00" }, { id: "8교시", type: "class", start: "16:00", end: "17:00" },
-  { id: "청소/석식", type: "break", start: "17:00", end: "18:00" }, { id: "야자 1교시", type: "class", start: "18:00", end: "19:00" },
-  { id: "쉬는 시간", type: "break", start: "19:00", end: "19:15" }, { id: "야자 2교시", type: "class", start: "19:15", end: "20:20" },
-  { id: "쉬는 시간", type: "break", start: "20:20", end: "20:30" }, { id: "야자 3교시", type: "class", start: "20:30", end: "22:00" }
-];
-
+// 시간표 및 시계 로직 
 setInterval(() => {
-  const now = new Date(); const day = now.getDay();
+  const now = new Date();
   document.getElementById('main-date-title').innerText = `[${now.toLocaleDateString('ko-KR', {month:'long', day:'numeric', weekday:'long'})}] 학급 현황판`;
   let hrs = now.getHours(); const mins = String(now.getMinutes()).padStart(2, '0'); const secs = String(now.getSeconds()).padStart(2, '0');
   document.getElementById('live-clock').innerText = `${hrs >= 12 ? '오후' : '오전'} ${hrs%12||12}:${mins}:${secs}`;
-  document.getElementById('fs-clock-text').innerText = `${String(hrs).padStart(2,'0')}:${mins}:${secs}`;
-  checkYajaTimer(now, day);
 }, 1000);
 
-function checkYajaTimer(now, day) {
-  const cur = String(now.getHours()).padStart(2,'0') + ":" + String(now.getMinutes()).padStart(2,'0');
-  const bOver = document.getElementById('break-overlay'); const eOver = document.getElementById('end-overlay'); const blkOver = document.getElementById('black-overlay');
-  
-  if (forceBlackScreen) { blkOver.style.display = 'block'; bOver.style.display = 'none'; eOver.style.display = 'none'; return; }
-  if (cur >= "22:00" && cur < "22:05") { eOver.style.display = 'flex'; bOver.style.display = 'none'; blkOver.style.display = 'none'; return; } 
-  else if (cur >= "22:05" || cur < "07:30") { blkOver.style.display = 'block'; bOver.style.display = 'none'; eOver.style.display = 'none'; return; } 
-  else { eOver.style.display = 'none'; blkOver.style.display = 'none'; }
-
-  let statStr = "따뜻한 마음과 성실한 걸음으로"; let inBreak = false;
-  if ([1,2,3,4,5].includes(day)) {
-    for (let s of FULL_TIMETABLE) {
-      if (cur >= s.start && cur < s.end) {
-        const [tH, tM] = s.end.split(":").map(Number);
-        const diffMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), tH, tM, 0) - now;
-        const ml = String(Math.floor(diffMs / 60000)).padStart(2,'0'); const sl = String(Math.floor((diffMs % 60000)/1000)).padStart(2,'0');
-        if (s.type === "break") {
-          inBreak = true; document.getElementById('break-title').innerText = `${s.id}입니다!`; document.getElementById('break-timer-text').innerText = `${ml}:${sl}`;
-          statStr = `[${s.id}] 종료까지 ${ml}분 ${sl}초 남음`; 
-          bOver.style.display = allowBreakOverlay ? 'flex' : 'none';
-        } else statStr = `[${s.id}] 종료까지 ${ml}분 ${sl}초 남음`;
-        break;
-      }
-    }
-  }
-  if(!inBreak) bOver.style.display = 'none';
-  document.getElementById('timer-status-bar').innerText = statStr;
-}
-
-let swInterval = null; let swTime = 0;
-function startStopwatch() { if(!swInterval) swInterval = setInterval(()=>{swTime++; document.getElementById('sw-time').innerText = `${String(Math.floor(swTime/3600)).padStart(2,'0')}:${String(Math.floor((swTime%3600)/60)).padStart(2,'0')}:${String(swTime%60).padStart(2,'0')}`;}, 1000); }
-function stopStopwatch() { clearInterval(swInterval); swInterval=null; }
-function resetStopwatch() { stopStopwatch(); swTime=0; document.getElementById('sw-time').innerText="00:00:00"; }
-
+// 캠스터디 화면 토글
 let isCamVisible = true;
 function toggleCamView() {
     isCamVisible = !isCamVisible;
@@ -269,16 +159,10 @@ function toggleCamView() {
     btn.style.color = isCamVisible ? 'var(--text-color)' : '#8B95A1';
 }
 
-db.ref('currentPlayingSong').on('value', snap => {
-  const d = snap.val(); const popup = document.getElementById('song-popup-ui');
-  if (d && d.status === 'playing') { document.getElementById('song-popup-title').innerText = d.title; document.getElementById('song-popup-artist').innerText = `${d.artist} (신청: ${d.author})`; popup.style.display = 'flex'; } 
-  else popup.style.display = 'none';
-});
-
+// 출결 데이터 및 특이사항 (스크롤 방지 가로배열 렌더링)
 const adv = ["강필정", "계시우", "김진영", "남궁승후", "서지호", "송예성", "송지율", "이규진"];
 db.ref().on('value', snap => {
   const data = snap.val() || {}; const conf = data.config || {};
-  if (conf.themeColor) document.documentElement.style.setProperty('--theme-color', conf.themeColor);
   
   if (conf.boardActive !== false) {
     document.getElementById('active-board').style.display = 'flex';
@@ -290,44 +174,42 @@ db.ref().on('value', snap => {
       if (!g[s]) g[s] = []; g[s].push(n);
     }
     document.getElementById('val-total-count').innerText = `26명`; document.getElementById('val-current-count').innerText = `${26 + net}명`;
-    const sc = document.getElementById('val-spec-list'); sc.innerHTML = ""; let hs = false;
+    
+    // 특이사항 렌더링 (가로 자동 줄바꿈)
+    const sc = document.getElementById('val-spec-list'); 
+    let specHTML = ``; let hs = false;
     Object.keys(g).forEach(s => {
-      if(s !== "출석" && s !== "심화반 이동자습" && s !== "정상") { hs = true; sc.innerHTML += `<div style="margin-bottom:12px;"><span style="color:var(--text-color); font-weight:bold;">${s} (${g[s].length}):</span> <span class="spec-names ${['결석','조퇴'].includes(s)?'absent':''}">${g[s].join(", ")}</span></div>`; }
+      if(s !== "출석" && s !== "심화반 이동자습" && s !== "정상") { 
+          hs = true; 
+          specHTML += `<div style="background: var(--bg-color); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border-color);"><span style="color:var(--text-color); font-weight:bold;">${s} (${g[s].length}):</span> <span class="spec-names ${['결석','조퇴'].includes(s)?'absent':''}">${g[s].join(", ")}</span></div>`; 
+      }
     });
-    if (!hs) sc.innerHTML = '<div style="color:#8B95A1;">특이사항 없음</div>';
+    sc.innerHTML = hs ? specHTML : '<div style="color:#8B95A1;">특이사항 없음</div>';
   }
 });
 
+// 티커
 db.ref('messages').limitToLast(15).on('value', snap => {
   const c = document.getElementById('ticker-container'); c.innerHTML = "";
   snap.forEach(ch => { const m = ch.val(); c.innerHTML += `<div class="ticker-item"><span>[${m.nickname||'익명'}]</span>${m.message}</div>`; });
 });
 
-// ============== 대시보드 WebRTC 수신 및 역방향 연결 관제 로직 ==============
-const globalIceConfig = { hash: 'dashboard', config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] } };
-const pingSound = new Audio('https://t1.daumcdn.net/kakaotalk/public/sound/talk_incoming.mp3');
-
-const peer = new Peer('CLASS104_ELECTRONIC_BLACKBOARD_2026', globalIceConfig);
+// ============== WebRTC 완벽 연동 엔진 (대시보드 핑 패치) ==============
+const peer = new Peer('CLASS104_ELECTRONIC_BLACKBOARD_2026'); // 구글망 제외, 가장 안정적인 기본망 사용
 let currentStreams = {};
 
 peer.on('open', (id) => {
     console.log('대시보드 전광판 인프라 개통 완료 ID:', id);
-    
-    // [핵심 패치] 학생들이 보낸 다이렉트 수신 리슨
-    peer.on('call', (call) => {
-        call.answer();
-        handleIncomingStream(call);
-    });
+    // 대시보드가 새로고침 되었음을 학생들에게 알려 강제로 화면을 다시 쏘게 만듦
+    db.ref('camStudy/dashboardPing').set(Date.now()); 
 });
 
-function handleIncomingStream(call) {
+peer.on('call', (call) => {
+    call.answer();
     call.on('stream', (remoteStream) => {
-        const studentNum = call.peer.replace('CLASS104_STUDENT_', '');
         const boxId = 'cam-box-' + call.peer;
         
         if (!document.getElementById(boxId)) {
-            pingSound.play().catch(e => {});
-
             const container = document.createElement('div');
             container.className = 'cam-box';
             container.id = boxId;
@@ -353,14 +235,13 @@ function handleIncomingStream(call) {
             updateCamCount();
         }
     });
-}
+});
 
-// DB 원격 실시간 모니터링하여 꺼진 학생 화면을 클린 제거
+// 캠 종료한 학생 화면 자동 삭제
 db.ref('camStudy/activePeers').on('value', snap => {
     const activePeers = [];
     snap.forEach(child => { activePeers.push(child.val().peerId); });
     
-    // 현재 켜져있는데 DB에 없는 Peer(종료한 학생)는 삭제 처리
     Object.keys(currentStreams).forEach(peerId => {
         if (!activePeers.includes(peerId)) {
             const box = document.getElementById('cam-box-' + peerId);
