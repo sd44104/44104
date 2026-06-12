@@ -35,7 +35,7 @@ body { background: var(--bg-color); color: var(--text-color); overflow: hidden; 
 .spec-names { color: #34C759; }
 .spec-names.absent { color: #F04452; }
 
-/* [수정] 랭킹 보드 영역을 모자이크 캠 보드로 변경 */
+/* 실시간 열공 캠 보드 */
 #side-rank-board { flex: 1; background: var(--panel-bg); border-radius: 30px; padding: 40px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
 .side-box-title { display: flex; justify-content: space-between; align-items: center; font-size: 36px; font-weight: 900; color: var(--theme-color); border-bottom: 2px solid var(--border-color); padding-bottom: 15px; flex-shrink: 0; }
 .cam-count-badge { background: var(--theme-color); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 24px; font-weight: bold; }
@@ -176,10 +176,16 @@ input:checked + .slider:before { transform: translateX(22px); }
     <div class="info-row"><div class="info-label">현재인원</div><div class="info-value" id="val-current-count">26명</div></div>
     <div class="info-row"><div class="info-label">특이사항</div><div class="spec-container" id="val-spec-list"></div></div>
   </div>
+  
   <div id="side-rank-board">
     <div class="side-box-title">
         <span>🎥 실시간 열공 캠</span>
-        <span class="cam-count-badge" id="cam-active-count">0명</span>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button id="toggle-cam-view-btn" onclick="toggleCamView()" style="background:none; border:none; color:var(--text-color); font-size:24px; cursor:pointer; transition: 0.2s;">
+                <i class="fa-solid fa-eye"></i>
+            </button>
+            <span class="cam-count-badge" id="cam-active-count">0명</span>
+        </div>
     </div>
     <div id="cam-mosaic-grid"></div>
   </div>
@@ -273,23 +279,30 @@ function startStopwatch() { if(!swInterval) swInterval = setInterval(()=>{swTime
 function stopStopwatch() { clearInterval(swInterval); swInterval=null; }
 function resetStopwatch() { stopStopwatch(); swTime=0; document.getElementById('sw-time').innerText="00:00:00"; }
 
+// 캠스터디 숨기기/보이기
+let isCamVisible = true;
+function toggleCamView() {
+    isCamVisible = !isCamVisible;
+    const grid = document.getElementById('cam-mosaic-grid');
+    const btn = document.getElementById('toggle-cam-view-btn');
+    
+    if (isCamVisible) {
+        grid.style.display = 'grid';
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+        btn.style.color = 'var(--text-color)';
+    } else {
+        grid.style.display = 'none';
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+        btn.style.color = '#8B95A1';
+    }
+}
+
 db.ref('currentPlayingSong').on('value', snap => {
   const d = snap.val(); const popup = document.getElementById('song-popup-ui');
   if (d && d.status === 'playing') { document.getElementById('song-popup-title').innerText = d.title; document.getElementById('song-popup-artist').innerText = `${d.artist} (신청: ${d.author})`; popup.style.display = 'flex'; } 
   else popup.style.display = 'none';
 });
 
-db.ref('dDays').on('value', snap => {
-  const c = document.getElementById('dday-container'); c.innerHTML = "";
-  if(!snap.exists()) { c.innerHTML = "<div style='color:#888; font-size:28px;'>등록된 디데이가 없습니다.</div>"; return; }
-  let a = []; snap.forEach(ch => {if(ch.val()) a.push(ch.val());});
-  a.sort((x,y) => new Date(x.date) - new Date(y.date)).forEach(i => {
-    const td = new Date(i.date); td.setHours(0,0,0,0); const diff = Math.ceil((td - new Date().setHours(0,0,0,0)) / 86400000);
-    c.innerHTML += `<div class="dday-item"><div class="dday-title">${i.title}</div><div class="dday-days">${diff===0 ? "D-DAY" : (diff>0 ? "D-"+diff : "D+"+Math.abs(diff))}</div></div>`;
-  });
-});
-
-let studentNoticeTimeout = null;
 db.ref('classNotices').limitToLast(1).on('value', snap => {
   if(snap.exists()){
     let latest = null; snap.forEach(c => latest = c.val());
@@ -299,22 +312,9 @@ db.ref('classNotices').limitToLast(1).on('value', snap => {
        document.getElementById('popup-badge-ui').style.background = '#FF9F0A';
        document.getElementById('popup-notice-text').innerText = latest.text;
        over.style.display = 'flex';
-       clearTimeout(studentNoticeTimeout); studentNoticeTimeout = setTimeout(() => { over.style.display = 'none'; }, 15000);
+       setTimeout(() => { over.style.display = 'none'; }, 15000);
     }
   }
-});
-
-db.ref('classNotices_forceHide').on('value', snap => { if(snap.exists()) { document.getElementById('notice-overlay').style.display = 'none'; clearTimeout(studentNoticeTimeout); } });
-
-let adminNoticeTimeout = null;
-db.ref('notices').limitToLast(1).on('value', snap => {
-  const over = document.getElementById('notice-overlay');
-  if(snap.exists()) {
-    let t="", u=false; snap.forEach(c => { const d=c.val(); t=d.message; u=d.useTTS; });
-    document.getElementById('popup-badge-ui').innerText = `선생님 공지`; document.getElementById('popup-badge-ui').style.background = '#BF5AF2'; document.getElementById('popup-notice-text').innerText = t; over.style.display = 'flex';
-    clearTimeout(adminNoticeTimeout); adminNoticeTimeout = setTimeout(() => { over.style.display = 'none'; }, 15000);
-    if (u && 'speechSynthesis' in window) { window.speechSynthesis.cancel(); const msg = new SpeechSynthesisUtterance(t); msg.lang = 'ko-KR'; window.speechSynthesis.speak(msg); }
-  } else over.style.display = 'none';
 });
 
 const adv = ["강필정", "계시우", "김진영", "남궁승후", "서지호", "송예성", "송지율", "이규진"];
@@ -322,9 +322,6 @@ db.ref().on('value', snap => {
   const data = snap.val() || {}; const conf = data.config || {};
   if (conf.themeColor) document.documentElement.style.setProperty('--theme-color', conf.themeColor);
   
-  if (conf.studentNotice) { document.getElementById('global-notice-bar').style.display='flex'; document.getElementById('global-notice-marquee').innerText = conf.studentNotice; }
-  else document.getElementById('global-notice-bar').style.display='none';
-
   if (conf.boardActive !== false) {
     document.getElementById('active-board').style.display = 'flex'; document.getElementById('idle-screen').style.display = 'none';
     let net = 0, g = {};
@@ -342,8 +339,6 @@ db.ref().on('value', snap => {
     if (!hs) sc.innerHTML = '<div style="color:#8B95A1;">특이사항 없음</div>';
   } else {
     document.getElementById('active-board').style.display = 'none'; document.getElementById('idle-screen').style.display = 'flex';
-    const sC = document.getElementById('schedule-container'); sC.innerHTML = "";
-    if (data.schedules) Object.values(data.schedules).forEach(t => sC.innerHTML += `<div class="schedule-card-item">${t}</div>`); else sC.innerHTML = '<div style="color:#888; font-size:28px;">등록된 일정이 없습니다.</div>';
   }
 });
 
@@ -353,18 +348,20 @@ db.ref('messages').limitToLast(15).on('value', snap => {
   if (cnt === 0) c.innerHTML = '<div class="ticker-item">따뜻한 한마디를 남겨주세요!</div>';
 });
 
-// [추가] 실시간 열공 캠 처리 스크립트
+// [네트워크 보안 통합 패치] 구글 공식 글로벌 우회용 STUN 서버망
+const globalIceConfig = { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] } };
 const pingSound = new Audio('https://t1.daumcdn.net/kakaotalk/public/sound/talk_incoming.mp3');
-const peer = new Peer('CLASS104_ELECTRONIC_BLACKBOARD_2026'); 
+
+const peer = new Peer('CLASS104_ELECTRONIC_BLACKBOARD_2026', globalIceConfig); 
 let activeCamCount = 0;
 
-peer.on('open', (id) => console.log('전자칠판 Peer ID:', id));
+peer.on('open', (id) => console.log('보드 화상 수신 서버 개통 완료:', id));
 
 peer.on('call', (call) => {
     call.answer(); 
     call.on('stream', (remoteStream) => {
         if (!document.getElementById('cam-box-' + call.peer)) {
-            pingSound.play().catch(e => console.log(e));
+            pingSound.play().catch(e => console.log("알림음 딜레이:", e));
 
             const container = document.createElement('div');
             container.className = 'cam-box';
@@ -374,8 +371,9 @@ peer.on('call', (call) => {
             video.srcObject = remoteStream;
             video.autoplay = true;
             video.playsInline = true;
+            video.muted = true;
 
-            const name = call.peer.split('_')[0] || "학생";
+            const name = (call.metadata && call.metadata.userName) ? call.metadata.userName : "열공학생";
             const label = document.createElement('div');
             label.className = 'cam-label';
             label.innerHTML = `<i class="fa-solid fa-circle" style="color:#34C759; font-size:10px;"></i> ${name}`;
