@@ -35,7 +35,6 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .nav-item.active { background: #e0f2fe; color: #0284c7; }
 .btn-outline { border: 1px solid #dee2e6; background: transparent; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; color: var(--text-dark); }
 .btn-outline:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-.btn-admin-gate { border: 2px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
 /* 메인 레이아웃 및 뷰 세션 */
 .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; flex-grow: 1; width: 100%; }
@@ -55,7 +54,6 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .btn-primary:hover { background: var(--primary-hover); }
 
 /* 홈 대시보드 내부 레이아웃 */
-.notice-banner { background: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 15px 20px; border-radius: 12px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .home-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
 .panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 25px; }
 .section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -110,7 +108,6 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
     <button class="nav-item" id="nav-btn-chat" onclick="switchTab('chat')">실시간 커뮤니티</button>
     <button class="nav-item" id="nav-btn-camstudy" onclick="switchTab('camstudy')">우리반 캠스터디</button>
     <button class="nav-item" id="nav-btn-games" onclick="switchTab('games')">게임존</button>
-    <button class="btn-outline btn-admin-gate" id="nav-btn-admin" onclick="gateToAdmin()"><i class="fa-solid fa-lock"></i> 관리자 로그인</button>
   </div>
 </nav>
 
@@ -175,8 +172,6 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
           <div class="util-grid">
             <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.riroschool.kr')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
             <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.sen.hs.kr')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
-            <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
-            <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
           </div>
         </div>
       </div>
@@ -261,8 +256,6 @@ function doLogin() {
     const name = document.getElementById('login-id').value.trim();
     const pw = document.getElementById('login-pw').value;
     if(!studentMap[name]) return alert('등록되지 않은 학생입니다.');
-    
-    // 단순 비밀번호 일치 (실제 환경에선 파이어베이스 인증)
     if(pw === studentMap[name].defaultPw || pw === '1234') { 
         loggedInUser = name;
         localStorage.setItem('savedStudentName', name);
@@ -273,6 +266,7 @@ function doLogin() {
 }
 
 function doLogout() {
+    if(isCamActive) toggleStudyCam();
     localStorage.removeItem('savedStudentName');
     location.reload();
 }
@@ -326,12 +320,7 @@ function closePortalView() {
   document.getElementById('main-contents-wrapper').style.display = 'block';
 }
 
-function gateToAdmin() {
-  alert("관리자 페이지로 이동합니다.");
-  window.location.href = "admin.html"; // 관리자 페이지 연동
-}
-
-// ============== WebRTC 캠스터디 모듈 ==============
+// ============== 우리반 캠스터디 다자간 + 대시보드 동시 연결엔진 ==============
 const globalIceConfig = { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] } };
 
 let localStream = null;
@@ -343,6 +332,7 @@ async function toggleStudyCam() {
     const btn = document.getElementById('btn-toggle-cam-study');
     
     if (isCamActive) {
+        // 종료 처리
         if (localStream) localStream.getTracks().forEach(t => t.stop());
         if (myPeer) { myPeer.destroy(); myPeer = null; }
         
@@ -359,6 +349,7 @@ async function toggleStudyCam() {
         connectedPeers = {};
         isCamActive = false;
     } else {
+        // 실행 처리
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             document.getElementById('my-cam-video-study').srcObject = localStream;
@@ -374,17 +365,24 @@ async function toggleStudyCam() {
             myPeer = new Peer(myPeerId, globalIceConfig);
 
             myPeer.on('open', (id) => {
+                // 1. 파이어베이스에 내 활성 상태 업로드
                 db.ref('camStudy/activePeers/' + myNum).set({ name: loggedInUser, peerId: id });
+                
+                // 2. [오류 수정 핵심] 대시보드로 내 스트림 쏘기 (대시보드가 켜져있을 때 인식)
                 myPeer.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream, { metadata: { userName: loggedInUser } });
 
+                // 3. 다른 학생방에 있던 친구들에게 내 스트림 전송
                 db.ref('camStudy/activePeers').once('value', snap => {
                     snap.forEach(child => {
                         const remoteData = child.val();
-                        if (child.key !== myNum) callPeer(remoteData.peerId, remoteData.name);
+                        if (child.key !== myNum) {
+                            callPeer(remoteData.peerId, remoteData.name);
+                        }
                     });
                 });
             });
 
+            // 4. 나중에 들어온 다른 친구가 전송한 화면 수신
             myPeer.on('call', call => {
                 call.answer(localStream); 
                 call.on('stream', remoteStream => {
@@ -395,14 +393,14 @@ async function toggleStudyCam() {
             });
 
         } catch (e) {
-            alert('카메라 권한을 허용해주세요!');
-            console.error("Cam Error:", e);
+            alert('카메라 장치를 확인해 주세요.');
+            console.error(e);
         }
     }
 }
 
 function callPeer(peerId, name) {
-    if (connectedPeers[peerId]) return;
+    if (connectedPeers[peerId] || peerId === 'CLASS104_ELECTRONIC_BLACKBOARD_2026') return;
     const call = myPeer.call(peerId, localStream, { metadata: { userName: loggedInUser } });
     connectedPeers[peerId] = call;
     
@@ -413,7 +411,7 @@ function callPeer(peerId, name) {
 }
 
 function addRemoteVideo(peerId, stream, name) {
-    if (document.getElementById('remote-cam-' + peerId)) return;
+    if (peerId === 'CLASS104_ELECTRONIC_BLACKBOARD_2026' || document.getElementById('remote-cam-' + peerId)) return;
     
     const container = document.createElement('div');
     container.id = 'remote-cam-' + peerId;
