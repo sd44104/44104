@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Class104 WebSchool</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PeerJS 라이브러리 추가 -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root {
+            --primary-color: #4361ee;
+            --bg-light: #f8f9fa;
+            --text-dark: #212529;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
+        }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 15px;
+        }
+        .profile-section {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .util-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .util-btn {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-section">
+        <h3>내 프로필 정보</h3>
+        <!-- 오른쪽 프로필 영역 내부 바로가기 메뉴 배치 -->
+        <div class="util-grid">
+            <button class="util-btn" onclick="alert('리로스쿨 연동')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
+            <button class="util-btn" onclick="alert('학교 종합 홈페이지 연동')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
+            <button class="util-btn" onclick="alert('신청곡 모달')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
+            <button class="util-btn" onclick="alert('비밀번호 변경 모달')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
+            
+            <!-- [신규 추가] 실시간 야자 전용 캠 제어 빨간 버튼 (독보적인 레이아웃) -->
+            <button class="util-btn" id="cam-toggle-btn" onclick="toggleCam()" style="grid-column: span 2; background: #ef4444; border-color: #ef4444; color: #ffffff; transition: all 0.2s;">
+                <i class="fa-solid fa-video" style="color: #ffffff !important; margin-bottom: 4px;"></i>
+                <span id="cam-btn-text">실시간 열공 캠 켜기</span>
+            </button>
+
+            <button class="util-btn" onclick="alert('모바일 학생증')" style="grid-column: span 2; background: #f0fdf4; border-color: #bbf7d0; color: #166534;"><i class="fa-solid fa-id-badge" style="color: #15803d;"></i> 모바일 원격 학생증 조회</button>
+        </div>
+    </div>
+
+    <script>
+        // 기존 학생 세션 변수 가상 매칭 (실제 시스템 배포 시 로그인된 실명 변수와 자동 바인딩)
+        let loggedInUser = localStorage.getItem('savedStudentName') || "테스트학생";
+
+        // --- 실시간 캠 송신 (Sender) 비즈니스 엔진 ---
+        let localStream = null;
+        let camPeer = null;
+        const SERVER_ID = "class104_board_cam_stream_secure";
+
+        async function toggleCam() {
+            const btn = document.getElementById('cam-toggle-btn');
+            const btnText = document.getElementById('cam-btn-text');
+            const btnIcon = btn.querySelector('i');
+
+            if (!loggedInUser) {
+                alert("로그인 후 이용 가능합니다.");
+                return;
+            }
+
+            if (!localStream) {
+                try {
+                    // 해상도 조절 및 프레임 최적화 설정을 통한 클라이언트 트래픽 소모 최소화 명세
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 320, height: 240, frameRate: 15 },
+                        audio: false // 야자실 소음 및 전자칠판 하울링 차단
+                    });
+
+                    // 이름 뒤에 랜덤 고유 식별 번호를 붙여 Peer 생성
+                    camPeer = new Peer(loggedInUser + "_" + Math.floor(Math.random() * 1000));
+                    
+                    camPeer.on('open', (id) => {
+                        // 대시보드 서버를 향해 스트림 전송 시작
+                        camPeer.call(SERVER_ID, localStream);
+                        
+                        // ON UI 가독성 변경 (다크 그레이 전환)
+                        btn.style.background = "#374151";
+                        btn.style.borderColor = "#374151";
+                        btnText.innerText = "실시간 열공 캠 끄기";
+                        btnIcon.className = "fa-solid fa-video-slash";
+                    });
+
+                    camPeer.on('error', (err) => {
+                        console.error(err);
+                        alert("캠 스트리밍 서버 연결에 실패했습니다.");
+                        stopCam();
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    alert("카메라 장치 권한을 허용해 주셔야 캠 송출이 가능합니다.");
+                }
+            } else {
+                stopCam();
+            }
+        }
+
+        function stopCam() {
+            const btn = document.getElementById('cam-toggle-btn');
+            const btnText = document.getElementById('cam-btn-text');
+            const btnIcon = btn.querySelector('i');
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            if (camPeer) {
+                camPeer.destroy();
+                camPeer = null;
+            }
+
+            // 초기 빨간색 버튼 원복
+            btn.style.background = "#ef4444";
+            btn.style.borderColor = "#ef4444";
+            btnText.innerText = "실시간 열공 캠 켜기";
+            btnIcon.className = "fa-solid fa-video";
+        }
+
+        function doLogout() {
+            if(confirm("로그아웃 하시겠습니까?")) {
+                // 로그아웃 시 웹캠 미디어 스트랙 물리 리소스 자원 즉시 반환 안전장치
+                if (localStream) localStream.getTracks().forEach(track => track.stop());
+                if (camPeer) camPeer.destroy();
+
+                localStorage.removeItem('savedStudentName');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
