@@ -12,7 +12,16 @@
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-:root { --primary-color: #4361ee; --primary-hover: #3a0ca3; --bg-light: #f8f9fa; --text-dark: #212529; --text-muted: #6c757d; --card-bg: #ffffff; --border-color: #e9ecef; }
+:root {
+  --primary-color: #4361ee;
+  --primary-hover: #3a0ca3;
+  --bg-light: #f8f9fa;
+  --text-dark: #212529;
+  --text-muted: #6c757d;
+  --card-bg: #ffffff;
+  --border-color: #e9ecef;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
 body { background-color: var(--bg-light); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
 
@@ -39,6 +48,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .login-box { background: var(--card-bg); padding: 45px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align: center; width: 100%; max-width: 420px; }
 .login-box h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
 .login-box p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
+
 .login-input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; outline: none; transition: border 0.2s; }
 .login-input:focus { border-color: var(--primary-color); }
 .btn-primary { width: 100%; padding: 14px; background: var(--primary-color); color: #fff; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
@@ -48,6 +58,7 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .notice-banner { background: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 15px 20px; border-radius: 12px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .home-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
 .panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 25px; }
+.panel:last-child { margin-bottom: 0; }
 .section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* 상태 스크린 보드 */
@@ -65,37 +76,50 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
 .profile-avatar { font-size: 3.5rem; margin-bottom: 10px; color: var(--primary-color); }
 .profile-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 3px; color: var(--text-dark); }
 .profile-card p { font-size: 0.85rem; color: var(--text-muted); }
+.profile-meta-actions { display: flex; justify-content: center; gap: 15px; margin-top: 15px; font-size: 0.85rem; }
 
 .util-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .util-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color); background: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: var(--text-dark); }
 .util-btn i { font-size: 1.4rem; color: var(--primary-color); }
 .util-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.06); border-color: var(--primary-color); }
 
-/* 캠 활성화 컨트롤러 컴포넌트 */
+/* 캠스터디 버튼 구조 */
 .cam-btn { background: #fff1f2; border-color: #fecdd3; color: #e11d48; flex-direction: row; justify-content: center; font-size: 1rem; cursor: pointer; border-radius: 12px; border: 1px solid; font-weight: 700;}
 .cam-btn.streaming { background: #22c55e; color: #fff; border-color: #16a34a; }
 
-/* 시간표/급식실 */
+/* 시간표 및 식단표 구조 (복구됨) */
 .time-meal-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
 .timetable-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.95rem; table-layout: fixed; }
 .timetable-table th, .timetable-table td { border: 1px solid var(--border-color); padding: 15px 8px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .timetable-table th { background: #f1f5f9; color: var(--text-muted); font-size: 0.85rem; }
 .timetable-table td.today { background: #e0f2fe; color: #0369a1; border: 2px solid #7dd3fc; font-weight: 700; }
+.current-class-box { border: 2px solid var(--text-dark); border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 25px; background: #fff; }
 .meal-box { border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #fff; }
 .meal-box h4 { border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 
 /* 커뮤니티 채팅창 */
 .chat-container { display: flex; flex-direction: column; height: 60vh; border: 1px solid var(--border-color); border-radius: 14px; background: #fff; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
 .chat-logs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #f8fafc; }
+.chat-bubble { max-width: 70%; padding: 12px 16px; border-radius: 14px; background: #e2e8f0; align-self: flex-start; font-size: 0.95rem; font-weight: 500; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.chat-bubble.admin { background: #dbeafe; border-left: 4px solid var(--primary-color); align-self: flex-start; }
 .chat-input-area { display: flex; padding: 15px; background: #fff; border-top: 1px solid var(--border-color); gap: 10px; align-items: center; }
 
-/* 모달 레이아웃 패널 */
+/* 모달 레이아웃 패널 (복구됨) */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
 .modal-overlay.active { display: flex; }
 .modal-content { background: #fff; padding: 30px; border-radius: 16px; width: 90%; max-width: 420px; text-align: center; border: 1px solid var(--border-color); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
+/* 인게임 오버레이 전면 활성화 스크린 (복구됨) */
+#game-iframe-container { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: #111; z-index: 2000; flex-direction: column; }
+.game-top-bar { padding: 15px 30px; background: #222; display: flex; justify-content: space-between; align-items: center; color: #fff;}
+.btn-exit-game { background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;}
+
 /* 다목적 웹 임베드 인프라 관제 스크린 */
 #portal-iframe-container { display: none; width: 100%; height: calc(100vh - 70px); background: #fff; border: none; animation: fadeIn 0.3s ease; }
+
+/* 대시보드 바로가기 플로팅 버튼 */
+.floating-dashboard-btn { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4); cursor: pointer; z-index: 2500; transition: transform 0.2s; text-decoration: none; }
+.floating-dashboard-btn:hover { transform: scale(1.1); }
 </style>
 </head>
 <body>
@@ -132,6 +156,10 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </section>
 
   <section class="view-section" id="view-home">
+    <div class="notice-banner" id="top-banner" onclick="switchTab('notices')" style="display: none;">
+      <i class="fa-solid fa-flag" style="color: #ef4444;"></i> <span id="banner-text">알림 공지사항 내역</span>
+    </div>
+    
     <div class="home-grid">
       <div>
         <div class="panel">
@@ -168,14 +196,16 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
             <div class="profile-avatar"><i class="fa-solid fa-circle-user"></i></div>
             <h3><span id="user-name-display" style="color: var(--primary-color);">학생</span> 사용자님</h3>
             <p>선덕고등학교 1학년 4반</p>
-            <div style="margin-top: 15px;">
-              <button onclick="doLogout()" style="border:none; background:none; color:#ef4444; font-weight:700; cursor:pointer;"><i class="fa-solid fa-power-off"></i> 기기 로그아웃</button>
+            <div class="profile-meta-actions">
+              <button onclick="doLogout()" style="border:none; background:none; color:#ef4444; font-weight:700; cursor:pointer;"><i class="fa-solid fa-power-off"></i> 원격 로그아웃</button>
             </div>
           </div>
           
           <div class="util-grid">
             <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.riroschool.kr')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
             <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.sen.hs.kr')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
+            <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
+            <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
             <button class="util-btn" onclick="openModal('mobile-id-modal')" style="grid-column: span 2; background: #f0fdf4; border-color: #bbf7d0; color: #166534;"><i class="fa-solid fa-id-badge" style="color: #15803d;"></i> 모바일 원격 학생증 조회</button>
           </div>
         </div>
@@ -190,12 +220,14 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
           <thead>
             <tr><th>교시</th><th id="th-1">월요일</th><th id="th-2">화요일</th><th id="th-3">수요일</th><th id="th-4">목요일</th><th id="th-5">금요일</th></tr>
           </thead>
-          <tbody id="timetable-body">
-            </tbody>
+          <tbody id="timetable-body"></tbody>
         </table>
       </div>
-      
       <div>
+        <div class="current-class-box">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase;">학사 타임 프레임 엔진</div>
+          <div id="class-countdown" style="font-size: 1.25rem; color: var(--primary-color); font-weight: 800;">연동 정보 계산 중...</div>
+        </div>
         <div class="panel meal-box">
           <h4><i class="fa-solid fa-bowl-food" style="color: #f59e0b;"></i> 오늘 중식 메뉴</h4>
           <div id="lunch-menu" style="line-height: 1.6; font-size: 0.9rem; color: var(--text-dark);">식단 로딩 중...</div>
@@ -241,8 +273,8 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
         <div class="chat-logs" id="chat-list"></div>
         <div class="chat-input-area">
           <input type="text" id="chat-nick" class="login-input" style="width: 140px; margin:0;" placeholder="자율 닉네임">
-          <input type="text" id="chat-msg" class="login-input" style="flex:1; margin:0;" placeholder="타인 비방성 발언은 차단 대상입니다.">
-          <button class="btn-primary" style="width: auto; padding: 0 30px; height: 48px;"><i class="fa-solid fa-paper-plane"></i> 전송</button>
+          <input type="text" id="chat-msg" class="login-input" style="flex:1; margin:0;" placeholder="타인 비방성 발언은 차단 대상입니다." onkeydown="if(event.keyCode==13) sendChat()">
+          <button class="btn-primary" style="width: auto; padding: 0 30px; height: 48px;" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i> 전송</button>
         </div>
       </div>
     </div>
@@ -251,16 +283,19 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   <section class="view-section" id="view-games">
     <div class="panel">
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-        <button class="util-btn" onclick="openEmbeddedPortal('https://aayanaqdas.github.io/block_blast/')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #00bcd4; color: #00bcd4;"><i class="fa-solid fa-shapes" style="font-size:3rem;"></i>테트리스</button>
-        <button class="util-btn" onclick="openEmbeddedPortal('https://wayou.github.io/t-rex-runner/')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #4caf50; color: #4caf50;"><i class="fa-solid fa-dragon" style="font-size:3rem;"></i>크롬 디노 러너</button>
+        <button class="util-btn" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '테트리스')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #00bcd4; color: #00bcd4;"><i class="fa-solid fa-shapes" style="font-size:3rem; color: #00bcd4;"></i>테트리스</button>
+        <button class="util-btn" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '블록블라스트')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #e91e63; color: #e91e63;"><i class="fa-solid fa-cubes" style="font-size:3rem; color: #e91e63;"></i>블록블라스트</button>
+        <button class="util-btn" onclick="openGame('https://wayou.github.io/t-rex-runner/', 'T-Rex')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #4caf50; color: #4caf50;"><i class="fa-solid fa-dragon" style="font-size:3rem; color: #4caf50;"></i>크롬 디노 러너</button>
       </div>
     </div>
   </section>
 
   <section class="view-section" id="view-notices">
-    <div class="panel">
-      <h3 style="font-size: 1.2rem; margin-bottom: 20px; font-weight: 700;"><i class="fa-solid fa-bell"></i> 반 전체 공지사항</h3>
-      <div id="full-notice-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    <div class="notice-layout">
+      <div id="dday-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;"></div>
+      <div class="panel">
+        <div id="full-notice-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -276,6 +311,41 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
   </div>
 </div>
 
+<div class="modal-overlay" id="song-modal">
+  <div class="modal-content">
+    <h3 style="margin-bottom: 20px; font-weight: 700;">쉬는시간 신청곡 접수</h3>
+    <input type="text" id="song-title" class="login-input" placeholder="곡 제목">
+    <input type="text" id="song-artist" class="login-input" placeholder="가수명">
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-primary" style="background: #e2e8f0; color: #111;" onclick="closeModal('song-modal')">취소</button>
+      <button class="btn-primary" onclick="submitSong()">신청하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal-content">
+    <h3 style="margin-bottom: 20px; font-weight: 700;">비밀번호 변경</h3>
+    <input type="password" id="new-pw" class="login-input" placeholder="새 비밀번호 입력">
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-primary" style="background: #e2e8f0; color: #111;" onclick="closeModal('pw-modal')">취소</button>
+      <button class="btn-primary" onclick="changePw()">변경 확정</button>
+    </div>
+  </div>
+</div>
+
+<div id="game-iframe-container">
+  <div class="game-top-bar">
+    <h3 id="game-title-bar">게임존 시스템 플레이어</h3>
+    <button class="btn-exit-game" onclick="closeGame()">나가기</button>
+  </div>
+  <iframe id="game-frame" src="" style="width: 100%; flex: 1; border: none; background: #fff;"></iframe>
+</div>
+
+<a href="dashboard.html" class="floating-dashboard-btn" title="대시보드로 이동">
+  <i class="fa-solid fa-chart-pie"></i>
+</a>
+
 <script>
 const firebaseConfig = { apiKey: "AlzaSyBsYbl11XCtPyUkby8GzEJHlxw_T28WNrg", authDomain: "class4-board-f6054.firebaseapp.com", databaseURL: "https://class4-board-f6054-default-rtdb.firebaseio.com/", projectId: "class4-board-f6054" };
 firebase.initializeApp(firebaseConfig);
@@ -286,10 +356,39 @@ const fullRosterRaw = [
 ];
 const studentMap = {};
 fullRosterRaw.forEach(s => { studentMap[s.name] = { num: s.num, defaultPw: "104" + s.num, fullName: s.num + " " + s.name }; });
+
 const advancedStudents = ["강필정", "계시우", "김진영", "이규진", "남궁승후", "송예성", "송지율", "서지호"];
 
 let loggedInUser = null;
+let ddayTimerInterval = null;
 let isPortalViewActive = false;
+
+// 복구된 시간표 기초 데이터
+const schoolTimeline = [
+  { title: "1교시", start: "08:10", end: "09:00" },
+  { title: "쉬는시간", start: "09:00", end: "09:10" },
+  { title: "2교시", start: "09:10", end: "10:00" },
+  { title: "쉬는시간", start: "10:00", end: "10:10" },
+  { title: "3교시", start: "10:10", end: "11:00" },
+  { title: "쉬는시간", start: "11:00", end: "11:10" },
+  { title: "4교시", start: "11:10", end: "12:00" },
+  { title: "점심시간", start: "12:00", end: "13:10" },
+  { title: "5교시", start: "13:10", end: "14:00" },
+  { title: "쉬는시간", start: "14:00", end: "14:10" },
+  { title: "6교시", start: "14:10", end: "15:00" },
+  { title: "쉬는시간", start: "15:00", end: "15:10" },
+  { title: "7교시", start: "15:10", end: "16:00" }
+];
+
+const fixedSchedule = [
+  ["국어A", "체육", "통과", "수학A", "한국사"], 
+  ["창독", "정보", "통사", "국어B", "진로"],   
+  ["통사", "영어A", "통과", "정보", "창체"],   
+  ["통사", "수학B", "음악", "과탐실", "창체"], 
+  ["체육", "통과", "한국사", "음악", "창체"],   
+  ["보강", "음악", "통과", "진로", "정보"],    
+  ["보강", "한국사", "수학A", "수학A", "영어A"] 
+];
 
 window.onload = () => {
   const savedUser = localStorage.getItem('savedStudentName');
@@ -324,11 +423,6 @@ function initApp() {
     document.getElementById('top-nav').style.display = 'flex';
     document.getElementById('user-name-display').innerText = loggedInUser;
     
-    // 학생증 정보 세팅
-    document.getElementById('id-name').innerText = loggedInUser;
-    document.getElementById('id-number').innerText = "104" + studentMap[loggedInUser].num;
-    try { JsBarcode("#barcode-canvas", "104" + studentMap[loggedInUser].num, {format: "CODE39", displayValue: false, height: 50}); } catch(e){}
-    
     if(advancedStudents.includes(loggedInUser)) {
         document.getElementById('advanced-panel-zone').style.display = 'block';
         document.getElementById('normal-panel-zone').style.display = 'block';
@@ -339,10 +433,19 @@ function initApp() {
     db.ref('studentStates/' + studentMap[loggedInUser].num + ' ' + loggedInUser).on('value', snap => {
         if(snap.exists()) document.getElementById('my-current-status').innerText = snap.val();
     });
+
+    renderTimetable();
+    setInterval(updateTimetableTimer, 1000);
 }
 
+// 상태 변경 로직 복구
 function changeStatus(status) {
     if(!loggedInUser) return;
+    if (status === '기타') {
+        let rs = prompt("사유를 입력해주세요 (10자 이내)");
+        if (rs && rs.trim() !== '') status = rs.trim().substring(0, 10);
+        else return;
+    }
     db.ref('studentStates/' + studentMap[loggedInUser].num + ' ' + loggedInUser).set(status);
     document.getElementById('my-current-status').innerText = status;
 }
@@ -372,14 +475,127 @@ function closePortalView() {
   document.getElementById('main-contents-wrapper').style.display = 'block';
 }
 
-function gateToAdmin() {
-  window.location.href = "admin.html"; // 실제 관리자 페이지 진입 연결
+function openGame(url, title) {
+  document.getElementById('game-title-bar').innerText = title;
+  document.getElementById('game-frame').src = url;
+  document.getElementById('game-iframe-container').style.display = 'flex';
+}
+function closeGame() {
+  document.getElementById('game-frame').src = '';
+  document.getElementById('game-iframe-container').style.display = 'none';
 }
 
-function openModal(id) { document.getElementById(id).classList.add('active'); }
+function openModal(id) { 
+  if(id === 'mobile-id-modal') {
+     document.getElementById('id-name').innerText = loggedInUser;
+     const number = "104" + studentMap[loggedInUser].num;
+     document.getElementById('id-number').innerText = number;
+     JsBarcode("#barcode-canvas", "S" + number, { format: "CODE128", displayValue: false, background: "#f8f9fa", lineColor: "#1e293b", height: 60 });
+  }
+  document.getElementById(id).classList.add('active'); 
+}
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// ============== 우리반 캠스터디 통신 로직 (대시보드 핑 감지 추가) ==============
+function submitSong() {
+  const title = document.getElementById('song-title').value.trim();
+  const artist = document.getElementById('song-artist').value.trim();
+  if(!title) return alert("제목을 입력하세요.");
+  db.ref('songRequests').push({ title: title, artist: artist, author: loggedInUser, timestamp: Date.now() });
+  alert("신청곡이 접수되었습니다!");
+  closeModal('song-modal');
+}
+function changePw() { alert("데모 버전에서는 초기화되지 않습니다."); closeModal('pw-modal'); }
+
+// 복구된 타이머 계산 및 시간표 렌더링 로직
+function renderTimetable() {
+    const tbody = document.getElementById('timetable-body');
+    tbody.innerHTML = '';
+    const day = new Date().getDay();
+    if(day >= 1 && day <= 5) document.getElementById('th-' + day).style.color = '#0284c7';
+    
+    for(let r = 0; r < 7; r++) {
+        let tr = document.createElement('tr');
+        let th = document.createElement('td');
+        th.style.background = '#f8fafc'; th.style.color = 'var(--text-muted)'; th.style.fontSize = '0.85rem';
+        th.innerText = (r+1) + "교시"; tr.appendChild(th);
+        for(let c = 0; c < 5; c++) {
+            let td = document.createElement('td');
+            td.innerText = fixedSchedule[r][c];
+            if ((c+1) === day) td.className = 'today';
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
+}
+
+function updateTimetableTimer() {
+    const now = new Date();
+    const cur = String(now.getHours()).padStart(2,'0') + ":" + String(now.getMinutes()).padStart(2,'0');
+    let msg = "정규 수업 외 시간입니다";
+    
+    for (let s of schoolTimeline) {
+        if (cur >= s.start && cur < s.end) {
+            const [tH, tM] = s.end.split(":").map(Number);
+            const diffMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), tH, tM, 0) - now;
+            const ml = String(Math.floor(diffMs / 60000)).padStart(2,'0'); 
+            const sl = String(Math.floor((diffMs % 60000)/1000)).padStart(2,'0');
+            msg = `[${s.title}] 종료까지 ${ml}분 ${sl}초 남음`;
+            break;
+        }
+    }
+    document.getElementById('class-countdown').innerText = msg;
+}
+
+// 실시간 한마디 전송 복구
+function sendChat() {
+  if(!loggedInUser) return;
+  const msg = document.getElementById('chat-msg').value.trim();
+  let nick = document.getElementById('chat-nick').value.trim();
+  if(!msg) return;
+  if(!nick) nick = loggedInUser;
+  db.ref('messages').push({ nickname: nick, message: msg, timestamp: Date.now() });
+  document.getElementById('chat-msg').value = '';
+}
+
+db.ref('messages').limitToLast(50).on('value', snap => {
+  const list = document.getElementById('chat-list');
+  if(!list) return;
+  list.innerHTML = '';
+  snap.forEach(c => {
+     const d = c.val();
+     const isMe = d.nickname === loggedInUser || d.nickname === document.getElementById('chat-nick').value;
+     list.innerHTML += `<div class="chat-bubble ${isMe ? 'admin' : ''}"><b>${d.nickname}</b>: ${d.message}</div>`;
+  });
+  list.scrollTop = list.scrollHeight;
+});
+
+// 관리자 게이트 로직 복구
+function gateToAdmin() {
+  if (isPortalViewActive && document.getElementById('portal-iframe-container').src.includes('admin.html')) {
+    closePortalView();
+    return;
+  }
+  const idPrompt = prompt("ERP 제어소 접속용 관리자 ID를 고유 기입하세요:");
+  if(!idPrompt) return;
+  const pwPrompt = prompt("인프라 관리자 Access 패스워드를 입력하세요:");
+  if(!pwPrompt) return;
+
+  db.ref('auth/adminAccounts/' + idPrompt).once('value').then(snap => {
+    if(snap.exists() && snap.val().pw === pwPrompt) {
+      localStorage.setItem('adminUser', snap.val().name);
+      localStorage.setItem('adminId', idPrompt);
+      localStorage.setItem('isMasterAdmin', 'true');
+      openEmbeddedPortal('admin.html');
+      document.getElementById('nav-btn-admin').classList.add('active');
+    } else {
+      alert("⚠️ 내부 보안 인프라 불일치: 접근 권한 권외 등급입니다.");
+    }
+  });
+}
+
+// ============== 우리반 캠스터디 다자간 + 대시보드 동시 연결엔진 ==============
+const globalIceConfig = { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] } };
+
 let localStream = null;
 let myPeer = null;
 let isCamActive = false;
@@ -387,20 +603,16 @@ let connectedPeers = {};
 
 async function toggleStudyCam() {
     const btn = document.getElementById('btn-toggle-cam-study');
-    
     if (isCamActive) {
         if (localStream) localStream.getTracks().forEach(t => t.stop());
         if (myPeer) { myPeer.destroy(); myPeer = null; }
-        
         if (loggedInUser && studentMap[loggedInUser]) {
             db.ref('camStudy/activePeers/' + studentMap[loggedInUser].num).remove();
         }
-
         document.getElementById('cam-study-local-preview').style.display = 'none';
         btn.classList.remove('streaming');
         btn.innerHTML = '<i class="fa-solid fa-video"></i> 캠스터디 참여 및 화면 송출 켜기';
         document.getElementById('study-cam-grid').innerHTML = ''; 
-        
         for (let p in connectedPeers) if (connectedPeers[p]) connectedPeers[p].close();
         connectedPeers = {};
         isCamActive = false;
@@ -417,19 +629,18 @@ async function toggleStudyCam() {
             const myNum = studentMap[loggedInUser].num;
             const myPeerId = 'CLASS104_STUDENT_' + myNum;
             
-            // 안정적인 PeerJS 기본망
-            myPeer = new Peer(myPeerId);
+            myPeer = new Peer(myPeerId, globalIceConfig);
 
             myPeer.on('open', (id) => {
                 db.ref('camStudy/activePeers/' + myNum).set({ name: loggedInUser, peerId: id });
-                
-                // 처음 켰을 때 대시보드로 콜
-                setTimeout(() => callDashboard(), 500);
+                myPeer.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream, { metadata: { userName: loggedInUser } });
 
                 db.ref('camStudy/activePeers').once('value', snap => {
                     snap.forEach(child => {
                         const remoteData = child.val();
-                        if (child.key !== myNum) callPeer(remoteData.peerId, remoteData.name);
+                        if (child.key !== myNum) {
+                            callPeer(remoteData.peerId, remoteData.name);
+                        }
                     });
                 });
             });
@@ -442,25 +653,12 @@ async function toggleStudyCam() {
                 });
                 call.on('close', () => removeRemoteVideo(call.peer));
             });
-
         } catch (e) {
-            alert('카메라 권한을 허용해주세요!');
+            alert('카메라 장치를 확인해 주세요.');
             console.error(e);
         }
     }
 }
-
-function callDashboard() {
-    if (!myPeer || !localStream) return;
-    myPeer.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream, { metadata: { userName: loggedInUser } });
-}
-
-// [핵심 패치] 대시보드가 새로고침되어 핑을 보내면, 내 스트림을 다시 강제로 쏴줌!
-db.ref('camStudy/dashboardPing').on('value', snap => {
-    if (isCamActive && myPeer && snap.exists()) {
-        callDashboard();
-    }
-});
 
 function callPeer(peerId, name) {
     if (connectedPeers[peerId] || peerId === 'CLASS104_ELECTRONIC_BLACKBOARD_2026') return;
