@@ -1,725 +1,166 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Class104 WebSchool</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-<style>
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-
-:root {
-  --primary-color: #4361ee;
-  --primary-hover: #3a0ca3;
-  --bg-light: #f8f9fa;
-  --text-dark: #212529;
-  --text-muted: #6c757d;
-  --card-bg: #ffffff;
-  --border-color: #e9ecef;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
-body { background-color: var(--bg-light); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
-
-/* 상단 네비게이션 */
-.navbar { background-color: var(--card-bg); padding: 0 40px; height: 70px; display: none; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-.logo { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
-.logo span { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; }
-.nav-links { display: flex; gap: 15px; list-style: none; align-items: center; }
-.nav-item { padding: 10px 16px; border-radius: 20px; font-weight: 600; font-size: 0.95rem; color: var(--text-dark); cursor: pointer; border: none; background: transparent; transition: all 0.2s; }
-.nav-item:hover { background: #f1f5f9; color: var(--primary-color); }
-.nav-item.active { background: #e0f2fe; color: #0284c7; }
-.btn-outline { border: 1px solid #dee2e6; background: transparent; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; color: var(--text-dark); }
-.btn-outline:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-.btn-admin-gate { border: 2px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-
-/* 메인 레이아웃 및 뷰 세션 */
-.container { max-width: 1200px; margin: 30px auto; padding: 0 20px; flex-grow: 1; width: 100%; }
-.view-section { display: none; animation: fadeIn 0.3s ease; }
-.view-section.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* 로그인 뷰 */
-.login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; width: 100%; }
-.login-box { background: var(--card-bg); padding: 45px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align: center; width: 100%; max-width: 420px; }
-.login-box h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
-.login-box p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
-
-.login-input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; outline: none; transition: border 0.2s; }
-.login-input:focus { border-color: var(--primary-color); }
-.btn-primary { width: 100%; padding: 14px; background: var(--primary-color); color: #fff; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
-.btn-primary:hover { background: var(--primary-hover); }
-
-/* 홈 대시보드 내부 레이아웃 */
-.notice-banner { background: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 15px 20px; border-radius: 12px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.home-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
-.panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 25px; }
-.panel:last-child { margin-bottom: 0; }
-.section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* 상태 스크린 보드 */
-.welcome-banner { background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); color: white; padding: 45px 30px; border-radius: 14px; box-shadow: 0 6px 20px rgba(67, 97, 238, 0.18); text-align: center; margin-bottom: 25px; }
-.status-val { font-size: 4.2rem; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.15); letter-spacing: -1px; }
-
-/* 분리형 출석 버튼 그룹 */
-.status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-.status-grid.advanced { grid-template-columns: repeat(2, 1fr); }
-.status-btn { padding: 14px 10px; border-radius: 10px; border: 1px solid var(--border-color); background: #f8fafc; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; color: var(--text-dark); text-align: center; }
-.status-btn:hover { border-color: var(--primary-color); background: #eff6ff; color: var(--primary-color); }
-
-/* 유틸리티 우측 프로필 레이아웃 */
-.profile-card { text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
-.profile-avatar { font-size: 3.5rem; margin-bottom: 10px; color: var(--primary-color); }
-.profile-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 3px; color: var(--text-dark); }
-.profile-card p { font-size: 0.85rem; color: var(--text-muted); }
-.profile-meta-actions { display: flex; justify-content: center; gap: 15px; margin-top: 15px; font-size: 0.85rem; }
-
-.util-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.util-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color); background: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: var(--text-dark); }
-.util-btn i { font-size: 1.4rem; color: var(--primary-color); }
-.util-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.06); border-color: var(--primary-color); }
-
-/* 시간표 및 식단표 구조 */
-.time-meal-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
-.timetable-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.95rem; table-layout: fixed; }
-.timetable-table th, .timetable-table td { border: 1px solid var(--border-color); padding: 15px 8px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.timetable-table th { background: #f1f5f9; color: var(--text-muted); font-size: 0.85rem; }
-.timetable-table td.today { background: #e0f2fe; color: #0369a1; border: 2px solid #7dd3fc; font-weight: 700; }
-.current-class-box { border: 2px solid var(--text-dark); border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 25px; background: #fff; }
-.meal-box { border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #fff; }
-.meal-box h4 { border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-
-/* 커뮤니티 채팅창 */
-.chat-container { display: flex; flex-direction: column; height: 60vh; border: 1px solid var(--border-color); border-radius: 14px; background: #fff; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-.chat-logs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #f8fafc; }
-.chat-bubble { max-width: 70%; padding: 12px 16px; border-radius: 14px; background: #e2e8f0; align-self: flex-start; font-size: 0.95rem; font-weight: 500; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-.chat-bubble.admin { background: #dbeafe; border-left: 4px solid var(--primary-color); align-self: flex-start; }
-.chat-input-area { display: flex; padding: 15px; background: #fff; border-top: 1px solid var(--border-color); gap: 10px; align-items: center; }
-
-/* 모달 레이아웃 패널 */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
-.modal-overlay.active { display: flex; }
-.modal-content { background: #fff; padding: 30px; border-radius: 16px; width: 90%; max-width: 420px; text-align: center; border: 1px solid var(--border-color); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-
-/* 인게임 오버레이 전면 활성화 스크린 */
-#game-iframe-container { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: #111; z-index: 2000; flex-direction: column; }
-.game-top-bar { padding: 15px 30px; background: #222; display: flex; justify-content: space-between; align-items: center; color: #fff;}
-.btn-exit-game { background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;}
-
-/* 다목적 웹 임베드 인프라 관제 스크린 */
-#portal-iframe-container { display: none; width: 100%; height: calc(100vh - 70px); background: #fff; border: none; animation: fadeIn 0.3s ease; }
-
-/* 오른쪽 귀퉁이 대시보드 바로가기 플로팅 버튼 스타일 */
-.floating-dashboard-btn {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
-  color: #ffffff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
-  cursor: pointer;
-  z-index: 2500;
-  transition: transform 0.2s, box-shadow 0.2s;
-  text-decoration: none;
-}
-.floating-dashboard-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.6);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Class104 WebSchool</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PeerJS 라이브러리 추가 -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root {
+            --primary-color: #4361ee;
+            --bg-light: #f8f9fa;
+            --text-dark: #212529;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
+        }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 15px;
+        }
+        .profile-section {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .util-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .util-btn {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
 
-<nav class="navbar" id="top-nav">
-  <div class="logo" onclick="switchTab('home')">
-    <i class="fas fa-graduation-cap"></i> Class104 <span>WebSchool Portal</span>
-  </div>
-  <div class="nav-links">
-    <button class="nav-item active" id="nav-btn-home" onclick="switchTab('home')">대시보드</button>
-    <button class="nav-item" id="nav-btn-timetable" onclick="switchTab('timetable')">시간표/급식실</button>
-    <button class="nav-item" id="nav-btn-chat" onclick="switchTab('chat')">실시간 커뮤니티</button>
-    <button class="nav-item" id="nav-btn-games" onclick="switchTab('games')">게임존</button>
-    <button class="nav-item" id="nav-btn-notices" onclick="switchTab('notices')">공지사항</button>
-    <button class="btn-outline btn-admin-gate" id="nav-btn-admin" onclick="gateToAdmin()"><i class="fa-solid fa-lock"></i> 관리자 로그인</button>
-  </div>
-</nav>
+    <div class="profile-section">
+        <h3>내 프로필 정보</h3>
+        <!-- 오른쪽 프로필 영역 내부 바로가기 메뉴 배치 -->
+        <div class="util-grid">
+            <button class="util-btn" onclick="alert('리로스쿨 연동')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
+            <button class="util-btn" onclick="alert('학교 종합 홈페이지 연동')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
+            <button class="util-btn" onclick="alert('신청곡 모달')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
+            <button class="util-btn" onclick="alert('비밀번호 변경 모달')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
+            
+            <!-- [신규 추가] 실시간 야자 전용 캠 제어 빨간 버튼 (독보적인 레이아웃) -->
+            <button class="util-btn" id="cam-toggle-btn" onclick="toggleCam()" style="grid-column: span 2; background: #ef4444; border-color: #ef4444; color: #ffffff; transition: all 0.2s;">
+                <i class="fa-solid fa-video" style="color: #ffffff !important; margin-bottom: 4px;"></i>
+                <span id="cam-btn-text">실시간 열공 캠 켜기</span>
+            </button>
 
-<iframe id="portal-iframe-container" src=""></iframe>
-
-<div class="container" id="main-contents-wrapper">
-  
-  <section class="view-section active" id="view-login">
-    <div class="login-container">
-      <div class="login-box">
-        <h2>로그인 후 사용가능합니다</h2>
-        <p>Class 104 학생 통합 인프라 시스템</p>
-        <input type="text" id="login-id" class="login-input" placeholder="성명 입력 (예: 홍길동)">
-        <input type="password" id="login-pw" class="login-input" placeholder="비밀번호를 입력하세요" onkeydown="if(event.keyCode==13) doLogin()">
-        <button class="btn-primary" onclick="doLogin()">인증 및 대시보드 진입</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="view-section" id="view-home">
-    <div class="notice-banner" id="top-banner" onclick="switchTab('notices')" style="display: none;">
-      <i class="fa-solid fa-flag" style="color: #ef4444;"></i> <span id="banner-text">알림 공지사항 내역</span>
-    </div>
-    
-    <div class="home-grid">
-      <div>
-        <div class="panel">
-          <div class="welcome-banner">
-            <div class="status-val" id="my-current-status">출석</div>
-          </div>
-          
-          <div id="normal-panel-zone" style="display: none;">
-            <div class="section-title">일반반 구역 제어 권한</div>
-            <div class="status-grid" style="margin-bottom: 25px;">
-              <button class="status-btn" onclick="changeStatus('출석')">출석</button>
-              <button class="status-btn" onclick="changeStatus('조퇴')">조퇴</button>
-              <button class="status-btn" onclick="changeStatus('결석')">결석</button>
-              <button class="status-btn" onclick="changeStatus('수학인재반')">수학인재</button>
-              <button class="status-btn" onclick="changeStatus('융합인재반')">융합인재</button>
-              <button class="status-btn" onclick="changeStatus('담임상담')">담임상담</button>
-              <button class="status-btn" onclick="changeStatus('기타')" style="grid-column: span 2;">기타 사유 기입</button>
-            </div>
-          </div>
-
-          <div id="advanced-panel-zone" style="display: none;">
-            <div class="section-title">심화반 구역 제어 권한</div>
-            <div class="status-grid advanced">
-              <button class="status-btn" onclick="changeStatus('1-4 교실자습')">교실 자습</button>
-              <button class="status-btn" onclick="changeStatus('심화반 이동자습')">심화반 자습</button>
-            </div>
-          </div>
+            <button class="util-btn" onclick="alert('모바일 학생증')" style="grid-column: span 2; background: #f0fdf4; border-color: #bbf7d0; color: #166534;"><i class="fa-solid fa-id-badge" style="color: #15803d;"></i> 모바일 원격 학생증 조회</button>
         </div>
-      </div>
-      
-      <div>
-        <div class="panel">
-          <div class="profile-card">
-            <div class="profile-avatar"><i class="fa-solid fa-circle-user"></i></div>
-            <h3><span id="user-name-display" style="color: var(--primary-color);">학생</span> 사용자님</h3>
-            <p>선덕고등학교 1학년 4반</p>
-            <div class="profile-meta-actions">
-              <button onclick="doLogout()" style="border:none; background:none; color:#ef4444; font-weight:700; cursor:pointer;"><i class="fa-solid fa-power-off"></i> 원격 로그아웃</button>
-            </div>
-          </div>
-          
-          <div class="util-grid">
-            <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.riroschool.kr')"><i class="fa-solid fa-bus"></i> 리로스쿨</button>
-            <button class="util-btn" onclick="openEmbeddedPortal('https://sunduck.sen.hs.kr')"><i class="fa-solid fa-school"></i> 학교 종합 홈피</button>
-            <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
-            <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
-            <button class="util-btn" onclick="openModal('mobile-id-modal')" style="grid-column: span 2; background: #f0fdf4; border-color: #bbf7d0; color: #166534;"><i class="fa-solid fa-id-badge" style="color: #15803d;"></i> 모바일 원격 학생증 조회</button>
-          </div>
-        </div>
-      </div>
     </div>
-  </section>
 
-  <section class="view-section" id="view-timetable">
-    <div class="time-meal-grid">
-      <div class="panel">
-        <table class="timetable-table" id="timetable-matrix">
-          <thead>
-            <tr><th>교시</th><th id="th-1">월요일</th><th id="th-2">화요일</th><th id="th-3">수요일</th><th id="th-4">목요일</th><th id="th-5">금요일</th></tr>
-          </thead>
-          <tbody id="timetable-body"></tbody>
-        </table>
-      </div>
-      
-      <div>
-        <div class="current-class-box">
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase;">학사 타임 프레임 엔진</div>
-          <div id="class-countdown" style="font-size: 1.25rem; color: var(--primary-color); font-weight: 800;">연동 정보 계산 중...</div>
-        </div>
-        <div class="panel meal-box">
-          <h4><i class="fa-solid fa-bowl-food" style="color: #f59e0b;"></i> 오늘 중식 메뉴</h4>
-          <div id="lunch-menu" style="line-height: 1.6; font-size: 0.9rem; color: var(--text-dark);">식단 로딩 중...</div>
-        </div>
-        <div class="panel meal-box">
-          <h4><i class="fa-solid fa-utensils" style="color: #10b981;"></i> 오늘 석식 메뉴</h4>
-          <div id="dinner-menu" style="line-height: 1.6; font-size: 0.9rem; color: var(--text-dark);">식단 로딩 중...</div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <script>
+        // 기존 학생 세션 변수 가상 매칭 (실제 시스템 배포 시 로그인된 실명 변수와 자동 바인딩)
+        let loggedInUser = localStorage.getItem('savedStudentName') || "테스트학생";
 
-  <section class="view-section" id="view-chat">
-    <div class="panel">
-      <div class="chat-container">
-        <div class="chat-logs" id="chat-list"></div>
-        <div class="chat-input-area">
-          <input type="text" id="chat-nick" class="login-input" style="width: 140px; margin:0;" placeholder="자율 닉네임">
-          <input type="text" id="chat-msg" class="login-input" style="flex:1; margin:0;" placeholder="타인 비방성 발언은 차단 대상입니다." onkeydown="if(event.keyCode==13) sendChat()">
-          <button class="btn-primary" style="width: auto; padding: 0 30px; height: 48px;" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i> 전송</button>
-        </div>
-      </div>
-    </div>
-  </section>
+        // --- 실시간 캠 송신 (Sender) 비즈니스 엔진 ---
+        let localStream = null;
+        let camPeer = null;
+        const SERVER_ID = "class104_board_cam_stream_secure";
 
-  <section class="view-section" id="view-games">
-    <div class="panel">
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-        <button class="util-btn" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '테트리스')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #00bcd4; color: #00bcd4;"><i class="fa-solid fa-shapes" style="font-size:3rem; color: #00bcd4;"></i>테트리스</button>
-        <button class="util-btn" onclick="openGame('https://aayanaqdas.github.io/block_blast/', '블록블라스트')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #e91e63; color: #e91e63;"><i class="fa-solid fa-cubes" style="font-size:3rem; color: #e91e63;"></i>블록블라스트</button>
-        <button class="util-btn" onclick="openGame('https://wayou.github.io/t-rex-runner/', 'T-Rex')" style="padding: 40px 20px; font-size: 1.2rem; border-color: #4caf50; color: #4caf50;"><i class="fa-solid fa-dragon" style="font-size:3rem; color: #4caf50;"></i>크롬 디노 러너</button>
-      </div>
-    </div>
-  </section>
+        async function toggleCam() {
+            const btn = document.getElementById('cam-toggle-btn');
+            const btnText = document.getElementById('cam-btn-text');
+            const btnIcon = btn.querySelector('i');
 
-  <section class="view-section" id="view-notices">
-    <div class="notice-layout">
-      <div id="dday-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;"></div>
-      
-      <div class="panel">
-        <div id="full-notice-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
-      </div>
-    </div>
-  </section>
-</div>
+            if (!loggedInUser) {
+                alert("로그인 후 이용 가능합니다.");
+                return;
+            }
 
-<div class="modal-overlay" id="mobile-id-modal">
-  <div class="modal-content" style="max-width: 340px;">
-    <h3 style="margin-bottom: 20px; font-weight: 700;">선덕고등학교 원격 모바일학생증</h3>
-    <div style="width: 90px; height: 90px; border-radius: 50%; background: #e2e8f0; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #94a3b8;"><i class="fa-solid fa-user"></i></div>
-    <h2 id="id-name" style="margin-bottom: 5px; font-weight: 800;">이름</h2>
-    <p id="id-number" style="color: var(--text-muted); margin-bottom: 20px; letter-spacing: 2px; font-weight: 700;">10400</p>
-    <svg id="barcode-canvas" style="width:100%; height:80px; margin-bottom: 20px;"></svg>
-    <button class="btn-primary" style="background:#64748b;" onclick="closeModal('mobile-id-modal')">닫기</button>
-  </div>
-</div>
+            if (!localStream) {
+                try {
+                    // 해상도 조절 및 프레임 최적화 설정을 통한 클라이언트 트래픽 소모 최소화 명세
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 320, height: 240, frameRate: 15 },
+                        audio: false // 야자실 소음 및 전자칠판 하울링 차단
+                    });
 
-<div class="modal-overlay" id="song-modal">
-  <div class="modal-content">
-    <h3 style="margin-bottom: 20px; font-weight: 700;">쉬는시간 신청곡 접수</h3>
-    <input type="text" id="song-title" class="login-input" placeholder="곡 제목">
-    <input type="text" id="song-artist" class="login-input" placeholder="가수명">
-    <div style="display: flex; gap: 10px;">
-      <button class="btn-primary" style="background: #e2e8f0; color: #111;" onclick="closeModal('song-modal')">취소</button>
-      <button class="btn-primary" onclick="submitSong()">신청하기</button>
-    </div>
-  </div>
-</div>
+                    // 이름 뒤에 랜덤 고유 식별 번호를 붙여 Peer 생성
+                    camPeer = new Peer(loggedInUser + "_" + Math.floor(Math.random() * 1000));
+                    
+                    camPeer.on('open', (id) => {
+                        // 대시보드 서버를 향해 스트림 전송 시작
+                        camPeer.call(SERVER_ID, localStream);
+                        
+                        // ON UI 가독성 변경 (다크 그레이 전환)
+                        btn.style.background = "#374151";
+                        btn.style.borderColor = "#374151";
+                        btnText.innerText = "실시간 열공 캠 끄기";
+                        btnIcon.className = "fa-solid fa-video-slash";
+                    });
 
-<div class="modal-overlay" id="pw-modal">
-  <div class="modal-content">
-    <h3 style="margin-bottom: 20px; font-weight: 700;">비밀번호 변경</h3>
-    <input type="password" id="new-pw" class="login-input" placeholder="새 비밀번호 입력">
-    <div style="display: flex; gap: 10px;">
-      <button class="btn-primary" style="background: #e2e8f0; color: #111;" onclick="closeModal('pw-modal')">취소</button>
-      <button class="btn-primary" onclick="changePw()">변경 확정</button>
-    </div>
-  </div>
-</div>
+                    camPeer.on('error', (err) => {
+                        console.error(err);
+                        alert("캠 스트리밍 서버 연결에 실패했습니다.");
+                        stopCam();
+                    });
 
-<div id="game-iframe-container">
-  <div class="game-top-bar">
-    <h3 id="game-title-bar">게임존 시스템 플레이어</h3>
-    <button class="btn-exit-game" onclick="closeGame()">나가기</button>
-  </div>
-  <iframe id="game-frame" src="" style="width: 100%; flex: 1; border: none; background: #fff;"></iframe>
-</div>
-
-<a href="dashboard.html" class="floating-dashboard-btn" title="대시보드로 이동">
-  <i class="fa-solid fa-chart-pie"></i>
-</a>
-
-<script>
-const firebaseConfig = { apiKey: "AlzaSyBsYbl11XCtPyUkby8GzEJHlxw_T28WNrg", authDomain: "class4-board-f6054.firebaseapp.com", databaseURL: "https://class4-board-f6054-default-rtdb.firebaseio.com/", projectId: "class4-board-f6054" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const fullRosterRaw = [
-  { num: "01", name: "강필정" }, { num: "02", name: "계시우" }, { num: "03", name: "김도현" }, { num: "04", name: "김민성" }, { num: "05", name: "김범준" }, { num: "06", name: "김시량" }, { num: "07", name: "김예담" }, { num: "08", name: "김우식" }, { num: "09", name: "김재준" }, { num: "10", name: "김재훈" }, { num: "11", name: "김정모" }, { num: "12", name: "김진규" }, { num: "13", name: "김진영" }, { num: "14", name: "김태린" }, { num: "15", name: "김태림" }, { num: "16", name: "김태환" }, { num: "17", name: "남궁승후" }, { num: "18", name: "박시우" }, { num: "19", name: "백동하" }, { num: "20", name: "서재원" }, { num: "21", name: "서지호" }, { num: "22", name: "송예성" }, { num: "23", name: "송지율" }, { num: "24", name: "오승현" }, { num: "25", name: "윤중근" }, { num: "26", name: "이건우" }, { num: "27", name: "이규진" }, { num: "28", name: "이명석" }, { num: "29", name: "이승우" }, { num: "30", name: "이유찬" }, { num: "31", name: "이태성" }, { num: "32", name: "장지후" }, { num: "33", name: "전서호" }, { num: "34", name: "정한준" }
-];
-const studentMap = {};
-fullRosterRaw.forEach(s => { studentMap[s.name] = { num: s.num, defaultPw: "104" + s.num, fullName: s.num + " " + s.name }; });
-
-const advancedStudents = ["강필정", "계시우", "김진영", "이규진", "남궁승후", "송예성", "송지율", "서지호"];
-
-let loggedInUser = null;
-let ddayTimerInterval = null;
-let isPortalViewActive = false;
-
-const schoolTimeline = [
-  { title: "1교시", start: "08:10", end: "09:00" },
-  { title: "쉬는시간", start: "09:00", end: "09:10" },
-  { title: "2교시", start: "09:10", end: "10:00" },
-  { title: "쉬는시간", start: "10:00", end: "10:10" },
-  { title: "3교시", start: "10:10", end: "11:00" },
-  { title: "쉬는시간", start: "11:00", end: "11:10" },
-  { title: "4교시", start: "11:10", end: "12:00" },
-  { title: "점심시간", start: "12:00", end: "13:10" },
-  { title: "5교시", start: "13:10", end: "14:00" },
-  { title: "쉬는시간", start: "14:00", end: "14:10" },
-  { title: "6교시", start: "14:10", end: "15:00" },
-  { title: "쉬는시간", start: "15:00", end: "15:10" },
-  { title: "7교시", start: "15:10", end: "16:00" }
-];
-
-const fixedSchedule = [
-  ["국어A", "체육", "통과", "수학A", "한국사"], 
-  ["창독", "정보", "통사", "국어B", "진로"],   
-  ["통사", "영어A", "통과", "정보", "창체"],   
-  ["통사", "수학B", "음악", "과탐실", "창체"], 
-  ["체육", "통과", "한국사", "음악", "창체"],   
-  ["보강", "음악", "통과", "진로", "정보"],    
-  ["보강", "한국사", "수학A", "수학A", "영어A"] 
-];
-
-window.onload = () => {
-  const savedUser = localStorage.getItem('savedStudentName');
-  if (savedUser && studentMap[savedUser]) {
-    loggedInUser = savedUser;
-    initApp();
-  }
-};
-
-function openEmbeddedPortal(url) {
-  isPortalViewActive = true;
-  document.getElementById('main-contents-wrapper').style.display = 'none';
-  
-  const portalFrame = document.getElementById('portal-iframe-container');
-  portalFrame.src = url;
-  portalFrame.style.display = 'block';
-  
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-}
-
-function gateToAdmin() {
-  if (isPortalViewActive && document.getElementById('portal-iframe-container').src.includes('admin.html')) {
-    closePortalView();
-    return;
-  }
-
-  const idPrompt = prompt("ERP 제어소 접속용 관리자 ID를 고유 기입하세요:");
-  if(!idPrompt) return;
-  const pwPrompt = prompt("인프라 관리자 Access 패스워드를 입력하세요:");
-  if(!pwPrompt) return;
-
-  db.ref('auth/adminAccounts/' + idPrompt).once('value').then(snap => {
-    if(snap.exists() && snap.val().pw === pwPrompt) {
-      localStorage.setItem('adminUser', snap.val().name);
-      localStorage.setItem('adminId', idPrompt);
-      localStorage.setItem('isMasterAdmin', 'true');
-      
-      openEmbeddedPortal('admin.html');
-      document.getElementById('nav-btn-admin').classList.add('active');
-    } else {
-      alert("⚠️ 내부 보안 인프라 불일치: 접근 권한 권외 등급입니다.");
-    }
-  });
-}
-
-function closePortalView() {
-  isPortalViewActive = false;
-  document.getElementById('portal-iframe-container').style.display = 'none';
-  document.getElementById('portal-iframe-container').src = '';
-  document.getElementById('main-contents-wrapper').style.display = 'block';
-  document.getElementById('nav-btn-admin').classList.remove('active');
-  switchTab('home');
-}
-
-function doLogin() {
-  const name = document.getElementById('login-id').value.trim();
-  const pw = document.getElementById('login-pw').value.trim();
-  if (!name || !studentMap[name]) { alert("등록되지 않은 이름입니다."); return; }
-
-  db.ref('auth/students/' + name).once('value').then(snap => {
-    const customPw = snap.val();
-    const validPw = customPw ? customPw : studentMap[name].defaultPw;
-    if (pw === validPw) {
-      localStorage.setItem('savedStudentName', name);
-      loggedInUser = name;
-      initApp();
-    } else { alert("비밀번호가 일치하지 않습니다."); }
-  });
-}
-
-function doLogout() {
-  if(confirm("로그아웃 하시겠습니까?")) {
-    localStorage.removeItem('savedStudentName');
-    location.reload();
-  }
-}
-
-function initApp() {
-  document.getElementById('view-login').style.display = 'none';
-  document.getElementById('top-nav').style.display = 'flex';
-  document.getElementById('user-name-display').innerText = loggedInUser;
-  switchTab('home');
-  
-  if (advancedStudents.includes(loggedInUser)) {
-    document.getElementById('normal-panel-zone').style.display = 'none';
-    document.getElementById('advanced-panel-zone').style.display = 'block';
-  } else {
-    document.getElementById('normal-panel-zone').style.display = 'block';
-    document.getElementById('advanced-panel-zone').style.display = 'none';
-  }
-
-  trackStatus();
-  trackChat();
-  trackNotices();
-  
-  const studentNum = "104" + studentMap[loggedInUser].num;
-  document.getElementById('id-name').innerText = loggedInUser;
-  document.getElementById('id-number').innerText = studentNum;
-  db.ref('studentBarcodes/' + loggedInUser).once('value').then(snap => {
-    const code = snap.val() || (studentNum + "0000");
-    JsBarcode("#barcode-canvas", code, { format: "CODE128", displayValue: true, width: 2, height: 50 });
-  });
-
-  renderStaticTimetable();
-  fetchNeisMealData();
-}
-
-function switchTab(tabId) {
-  if (isPortalViewActive) {
-    isPortalViewActive = false;
-    document.getElementById('portal-iframe-container').style.display = 'none';
-    document.getElementById('portal-iframe-container').src = '';
-    document.getElementById('main-contents-wrapper').style.display = 'block';
-    document.getElementById('nav-btn-admin').classList.remove('active');
-  }
-
-  document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  
-  const targetSec = document.getElementById(`view-${tabId}`);
-  if(targetSec) targetSec.classList.add('active');
-  
-  const targetBtn = document.getElementById(`nav-btn-${tabId}`);
-  if(targetBtn) targetBtn.classList.add('active');
-}
-
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-function changeStatus(stat) {
-  if (stat === '기타') {
-    stat = prompt("사유를 기입하세요:");
-    if (!stat) return;
-  }
-  const fullName = studentMap[loggedInUser].fullName;
-  db.ref('studentStates/' + fullName).set(stat).then(() => alert("상태가 실시간 업데이트 되었습니다."));
-}
-
-function trackStatus() {
-  const fullName = studentMap[loggedInUser].fullName;
-  db.ref('studentStates/' + fullName).on('value', snap => {
-    const curStatus = document.getElementById('my-current-status');
-    if(curStatus) curStatus.innerText = snap.val() || "출석";
-  });
-}
-
-function sendChat() {
-  const nick = document.getElementById('chat-nick').value.trim() || "익명";
-  const msg = document.getElementById('chat-msg').value.trim();
-  if(!msg) return;
-  db.ref('messages').push({ realName: studentMap[loggedInUser].fullName, nickname: nick, message: msg, timestamp: Date.now() }).then(() => {
-    document.getElementById('chat-msg').value = "";
-  });
-}
-
-function trackChat() {
-  db.ref('messages').limitToLast(30).on('value', snap => {
-    const list = document.getElementById('chat-list'); if(!list) return;
-    list.innerHTML = "";
-    snap.forEach(child => {
-      const d = child.val();
-      const div = document.createElement('div');
-      div.className = "chat-bubble" + (d.badge || d.realName === "시스템 관리자" ? " admin" : "");
-      div.innerHTML = `<div style="font-size:11px; color:#718096; font-weight:700; margin-bottom:4px;">${d.nickname}</div>${d.message}`;
-      list.appendChild(div);
-    });
-    list.scrollTop = list.scrollHeight;
-  });
-}
-
-function trackNotices() {
-  db.ref('config/studentNotice').on('value', snap => {
-    const txt = snap.val();
-    const banner = document.getElementById('top-banner');
-    if(banner) {
-      if(txt) { banner.style.display = 'flex'; document.getElementById('banner-text').innerText = txt; }
-      else banner.style.display = 'none';
-    }
-  });
-  
-  db.ref('classNotices').limitToLast(10).on('value', snap => {
-    const list = document.getElementById('full-notice-list'); if(!list) return;
-    list.innerHTML = "";
-    if(!snap.exists()){
-      list.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:10px;'>수신된 정규 고정 학사 공지 내역이 없습니다.</div>";
-      return;
-    }
-    let arr = []; snap.forEach(c => arr.push(c.val()));
-    arr.reverse().forEach(d => {
-      const txtVal = typeof d === 'object' ? (d.text || "내용 없음") : d;
-      const authorVal = typeof d === 'object' ? (d.author || "관리자") : "공지";
-      list.innerHTML += `<div style="padding:15px; border:1px solid var(--border-color); border-radius:12px; background:#f8fafc;"><div style="font-size:12px; color:var(--primary-color); font-weight:700; margin-bottom:4px;">${authorVal}</div>${txtVal}</div>`;
-    });
-  });
-
-  if(ddayTimerInterval) clearInterval(ddayTimerInterval);
-  db.ref('dDays').on('value', snap => {
-    const list = document.getElementById('dday-container'); if(!list) return;
-    list.innerHTML = "";
-    
-    let targetDates = [];
-    snap.forEach(c => { targetDates.push(c.val()); });
-    
-    const updateDdayClocks = () => {
-      list.innerHTML = "";
-      if(targetDates.length === 0) return;
-      
-      targetDates.forEach(d => {
-        const now = new Date();
-        const target = new Date(d.date + "T00:00:00");
-        const diff = target - now;
-        
-        let displayBadge = "";
-        if (diff <= 0 && diff >= -86400000) {
-          displayBadge = "D-DAY! 🎉";
-        } else if (diff < -86400000) {
-          displayBadge = "종료된 일정";
-        } else {
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-          const mins = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-          const secs = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
-          displayBadge = `D-${days} ${hours}:${mins}:${secs} 남음`;
+                } catch (err) {
+                    console.error(err);
+                    alert("카메라 장치 권한을 허용해 주셔야 캠 송출이 가능합니다.");
+                }
+            } else {
+                stopCam();
+            }
         }
-        
-        list.innerHTML += `<div style="border:1px solid var(--border-color); border-radius:12px; padding:18px; display:flex; justify-content:space-between; align-items:center; background:#fff; font-weight:700;"><span>${d.title}</span><span style="background:var(--text-dark); color:#fff; padding:6px 14px; border-radius:8px; font-size:1rem; min-width:180px; text-align:center;">${displayBadge}</span></div>`;
-      });
-    };
-    
-    ddayTimerInterval = setInterval(updateDdayClocks, 1000);
-    updateDdayClocks();
-  });
-}
 
-function submitSong() {
-  const t = document.getElementById('song-title').value.trim();
-  const a = document.getElementById('song-artist').value.trim();
-  if(!t || !a) { alert("빈 항목이 존재합니다."); return; }
-  db.ref('songRequests').push({ author: loggedInUser, title: t, artist: a, timestamp: Date.now() }).then(() => {
-    alert("신청곡 송출 리스트에 전송되었습니다."); closeModal('song-modal');
-    document.getElementById('song-title').value = ""; document.getElementById('song-artist').value = "";
-  });
-}
+        function stopCam() {
+            const btn = document.getElementById('cam-toggle-btn');
+            const btnText = document.getElementById('cam-btn-text');
+            const btnIcon = btn.querySelector('i');
 
-function changePw() {
-  const p = document.getElementById('new-pw').value.trim();
-  if(!p) return;
-  db.ref('auth/students/' + loggedInUser).set(p).then(() => { alert("성공적으로 변경되었습니다."); closeModal('pw-modal'); document.getElementById('new-pw').value = ""; });
-}
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            if (camPeer) {
+                camPeer.destroy();
+                camPeer = null;
+            }
 
-function openGame(url, title) {
-  document.getElementById('game-iframe-container').style.display = 'flex';
-  document.getElementById('game-title-bar').innerText = title;
-  document.getElementById('game-frame').src = url;
-}
-function closeGame() {
-  document.getElementById('game-iframe-container').style.display = 'none';
-  document.getElementById('game-frame').src = "";
-}
-
-const NEIS_KEY = '7be1608e99d34736b6729aab42d32665';
-const ATPT_CODE = 'B10';
-const SCHUL_CODE = '8dcd5c5f9b0d4fdfa83caf40261ccba6';
-
-function renderStaticTimetable() {
-  const now = new Date();
-  const day = now.getDay(); 
-  
-  const tbody = document.getElementById('timetable-body');
-  if(!tbody) return;
-  tbody.innerHTML = "";
-  
-  fixedSchedule.forEach((row, pIdx) => {
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td style="background:#f8fafc; font-weight:700;">${pIdx + 1}교시</td>`;
-    row.forEach((subject, dIdx) => {
-      const isToday = (day - 1 === dIdx);
-      tr.innerHTML += `<td class="${isToday ? 'today' : ''}">${subject}</td>`;
-    });
-    tbody.appendChild(tr);
-  });
-
-  if(day >= 1 && day <= 5) {
-    const targetTh = document.getElementById(`th-${day}`);
-    if(targetTh) targetTh.classList.add('today');
-  }
-
-  const calculateCurrentClassStatus = () => {
-    const tNow = new Date();
-    const currentMinutes = tNow.getHours() * 60 + tNow.getMinutes();
-    const currentDay = tNow.getDay();
-    
-    let matchedStatus = "방과 후 일과 종료 또는 주말";
-    
-    if (currentDay >= 1 && currentDay <= 5) {
-      for(let item of schoolTimeline) {
-        const startParts = item.start.split(":");
-        const endParts = item.end.split(":");
-        const startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-        const endMin = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-        
-        if(currentMinutes >= startMin && currentMinutes < endMin) {
-          if(item.title.includes("교시")) {
-            const periodIdx = parseInt(item.title.replace("교시","")) - 1;
-            const subjectName = (fixedSchedule[periodIdx] && fixedSchedule[periodIdx][currentDay-1]) ? fixedSchedule[periodIdx][currentDay-1] : "";
-            matchedStatus = `${item.title} [${subjectName || '수업'}] 진행 중`;
-          } else {
-            matchedStatus = `🍿 지금은 ${item.title}입니다!`;
-          }
-          break;
+            // 초기 빨간색 버튼 원복
+            btn.style.background = "#ef4444";
+            btn.style.borderColor = "#ef4444";
+            btnText.innerText = "실시간 열공 캠 켜기";
+            btnIcon.className = "fa-solid fa-video";
         }
-      }
-    }
-    
-    const timeClockStr = `${String(tNow.getHours()).padStart(2,'0')}시 ${String(tNow.getMinutes()).padStart(2,'0')}분`;
-    document.getElementById('class-countdown').innerHTML = `<div style="font-weight:800; color:var(--primary-color);">${matchedStatus}</div><div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">(${timeClockStr} 실시간 동기화)</div>`;
-  };
 
-  setInterval(calculateCurrentClassStatus, 1000);
-  calculateCurrentClassStatus();
-}
+        function doLogout() {
+            if(confirm("로그아웃 하시겠습니까?")) {
+                // 로그아웃 시 웹캠 미디어 스트랙 물리 리소스 자원 즉시 반환 안전장치
+                if (localStream) localStream.getTracks().forEach(track => track.stop());
+                if (camPeer) camPeer.destroy();
 
-async function fetchNeisMealData() {
-  const now = new Date();
-  const getFormattedDate = (d) => d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-  const todayStr = getFormattedDate(now);
-
-  try {
-    const mealRes = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MLSV_YMD=${todayStr}`);
-    const mealData = await mealRes.json();
-    if (mealData.mealServiceDietInfo) {
-      mealData.mealServiceDietInfo[1].row.forEach(m => {
-        const menuClean = m.DDISH_NM.replace(/<br\/>/g, ', ').replace(/[0-9.]/g, '').replace(/\*/g, '').trim();
-        if(m.MMEAL_SC_NM === '중식') document.getElementById('lunch-menu').innerText = menuClean;
-        if(m.MMEAL_SC_NM === '석식') document.getElementById('dinner-menu').innerText = menuClean;
-      });
-    } else {
-      document.getElementById('lunch-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
-      document.getElementById('dinner-menu').innerText = "오늘 급식 정보가 존재하지 않습니다.";
-    }
-  } catch(e) { console.error("급식 데이터 미러링 실패", e); }
-}
-</script>
+                localStorage.removeItem('savedStudentName');
+                location.reload();
+            }
+        }
+    </script>
 </body>
 </html>
