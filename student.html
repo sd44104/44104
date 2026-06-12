@@ -6,6 +6,7 @@
 <title>Class104 WebSchool</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<!-- [추가] PeerJS 라이브러리 추가 -->
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
@@ -233,9 +234,11 @@ body { background-color: var(--bg-light); color: var(--text-dark); display: flex
             <button class="util-btn" onclick="openModal('song-modal')"><i class="fa-solid fa-music"></i> 쉬는시간 신청곡</button>
             <button class="util-btn" onclick="openModal('pw-modal')"><i class="fa-solid fa-lock"></i> 비밀번호 변경</button>
             <button class="util-btn" onclick="openModal('mobile-id-modal')" style="grid-column: span 2; background: #f0fdf4; border-color: #bbf7d0; color: #166534;"><i class="fa-solid fa-id-badge" style="color: #15803d;"></i> 모바일 원격 학생증 조회</button>
+            <!-- [추가] 전자칠판 캠 켜기 버튼 -->
             <button class="util-btn cam-btn" id="btn-toggle-cam" onclick="toggleStudyCam()"><i class="fa-solid fa-video"></i> 전자칠판 현황판에 캠 켜기</button>
           </div>
           
+          <!-- [추가] 로컬 캠 확인 창 -->
           <div id="local-cam-preview">
             <video id="my-cam-video" autoplay playsinline muted></video>
           </div>
@@ -737,7 +740,7 @@ async function fetchNeisMealData() {
   } catch(e) { console.error("급식 데이터 미러링 실패", e); }
 }
 
-// [추가] 실시간 열공 캠 송출 로직
+// [추가] 실시간 열공 캠 송출 로직 (PeerJS 영문 ID화 및 메타데이터 포장 패치버전)
 let localStream = null;
 let peerConnection = null;
 let currentCall = null;
@@ -759,11 +762,15 @@ async function toggleStudyCam() {
             videoElem.srcObject = localStream;
             preview.style.display = 'block';
 
-            const uniqueId = loggedInUser + "_" + Math.floor(Math.random() * 10000);
-            peerConnection = new Peer(uniqueId);
+            // 통신 라이브러리(PeerJS)의 한글 ID 오류를 방지하기 위해 영문 단어 조합 키 생성
+            const safePeerId = "student_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+            peerConnection = new Peer(safePeerId);
 
             peerConnection.on('open', (id) => {
-                currentCall = peerConnection.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream);
+                // 한글 이름은 metadata 객체에 안전하게 포장하여 대시보드로 콜(Call) 요청
+                currentCall = peerConnection.call('CLASS104_ELECTRONIC_BLACKBOARD_2026', localStream, {
+                    metadata: { userName: loggedInUser }
+                });
             });
 
             btn.classList.add('streaming');
